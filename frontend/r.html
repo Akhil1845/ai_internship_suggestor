@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP Entrance Recreation</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+    <style>
+        /* CSS VARIABLES FROM SCREENSHOTS */
+        :root {
+            --color-shockingly-green: #0ae448;
+            --color-just-black: #0e100f;
+            --color-surface-white: #fffce1;
+            --color-lt-green: #abff84;
+            --color-core-button-gradient: linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%);
+        }
+
+        body {
+            background-color: var(--color-just-black);
+            color: var(--color-surface-white);
+            font-family: "Inter", sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent scroll during intro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .home-hero {
+            text-align: center;
+            position: relative;
+        }
+
+        /* HEADING STYLES */
+        .home-hero__heading {
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 800;
+            line-height: 0.9;
+            margin-bottom: 20px;
+            letter-spacing: -0.04em;
+            /* Start hidden for entrance */
+            visibility: hidden; 
+        }
+
+        .home-hero__subtitle {
+            font-size: 1.2rem;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .home-hero__button {
+            display: inline-block;
+            padding: 18px 40px;
+            background: var(--color-core-button-gradient);
+            border-radius: 100px;
+            color: var(--color-just-black);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            opacity: 0;
+        }
+
+        /* DECORATIVE ELEMENTS (The floaty shapes) */
+        .shape {
+            position: absolute;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .shape-1 { top: -20%; left: 10%; width: 60px; }
+        .shape-2 { bottom: 10%; right: 5%; width: 40px; }
+    </style>
+</head>
+<body>
+
+    <section class="home-hero">
+        <svg class="shape shape-1" viewBox="0 0 100 100"><rect width="100" height="100" fill="#fec5fb" rx="20"/></svg>
+        <svg class="shape shape-2" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#9d95ff"/></svg>
+
+        <div class="home-hero__heading">
+            Animate <br> anything
+        </div>
+
+        <div class="home-hero__subtitle">
+            GSAP – A wildly robust JavaScript animation library built for professionals
+        </div>
+
+        <a href="#" class="home-hero__button">Get GSAP</a>
+    </section>
+
+    <script>
+        // Register CustomEase if you have the business plugin, 
+        // otherwise we use standard Power eases.
+        
+        window.addEventListener("load", () => {
+            // THE ENTRANCE TIMELINE
+            const tl = gsap.timeline({
+                defaults: { ease: "power4.out" }
+            });
+
+            // 1. Make text visible immediately as animation starts
+            gsap.set(".home-hero__heading", { autoAlpha: 1 });
+
+            // 2. The main "Animate anything" entrance
+            tl.from(".home-hero__heading", {
+                duration: 1.8,
+                y: 100,
+                scale: 0.8,
+                rotationX: -20,
+                opacity: 0,
+                transformOrigin: "center bottom",
+                ease: "expo.out"
+            })
+            
+            // 3. Float in the shapes
+            .fromTo(".shape", 
+                { opacity: 0, scale: 0 }, 
+                { opacity: 0.6, scale: 1, stagger: 0.2, duration: 1 },
+                "-=1.2"
+            )
+
+            // 4. Slide up subtitle and button
+            .to(".home-hero__subtitle", {
+                opacity: 1,
+                y: 0,
+                duration: 1
+            }, "-=1")
+            
+            .to(".home-hero__button", {
+                opacity: 1,
+                y: 0,
+                duration: 0.8
+            }, "-=0.8");
+
+            // 5. Idle floating animation (Looping)
+            gsap.to(".shape-1", {
+                y: 20,
+                rotation: 15,
+                duration: 3,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+
+            gsap.to(".shape-2", {
+                y: -30,
+                x: 10,
+                duration: 4,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+        });
+    </script>
+</body>
+</html>

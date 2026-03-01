@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishroot - Login & Signup</title>
+    <style>
+        :root {
+            --primary-orange: #ff8c05;
+            --primary-yellow: #ffbb33;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --bg-blue: #f0f9ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #d1d5db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .main-card {
+            display: flex;
+            width: 1200px;
+            height: 700px;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* LEFT SIDE: FORM */
+        .form-container {
+            flex: 1;
+            background-color: var(--bg-blue);
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Cloud-like background effect */
+        .form-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 30%, white 0%, transparent 20%),
+                        radial-gradient(circle at 80% 70%, white 0%, transparent 25%);
+            opacity: 0.6;
+        }
+
+        .inner-form {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 60px;
+            margin-bottom: 20px;
+        }
+
+        h2 { color: var(--text-dark); font-size: 26px; margin-bottom: 10px; }
+        .desc { color: var(--text-gray); font-size: 13px; margin-bottom: 30px; line-height: 1.5; }
+
+        .input-box { text-align: left; margin-bottom: 15px; }
+        .input-box label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: var(--text-dark); }
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .pass-group { position: relative; }
+        .eye-icon { position: absolute; right: 12px; top: 12px; cursor: pointer; opacity: 0.5; }
+
+        .btn-grad {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-yellow));
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-grad:hover { transform: scale(1.02); }
+
+        .legal { font-size: 11px; color: var(--text-gray); margin: 20px 0; }
+        .legal a { color: var(--text-dark); font-weight: 700; text-decoration: none; }
+
+        .sep { display: flex; align-items: center; color: #cbd5e1; font-size: 12px; margin-bottom: 20px; }
+        .sep::before, .sep::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin: 0 10px; }
+
+        .social-grid { display: flex; gap: 10px; }
+        .social-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-area { margin-top: 25px; font-size: 14px; color: var(--text-gray); }
+        .toggle-link { color: var(--primary-orange); font-weight: 700; cursor: pointer; }
+
+        /* RIGHT SIDE: IMAGE */
+        .image-container {
+            flex: 1.2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            transition: background-image 0.8s ease-in-out;
+        }
+
+        /* Dark overlay for text readability */
+        .image-container::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(transparent 60%, rgba(0,0,0,0.8));
+        }
+
+        .promo-content { position: relative; z-index: 5; color: white; }
+        .promo-content h3 { font-size: 28px; margin-bottom: 10px; }
+        .promo-content p { font-size: 14px; opacity: 0.8; line-height: 1.6; }
+
+        @media (max-width: 900px) {
+            .image-container { display: none; }
+            .main-card { width: 450px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <div class="form-container">
+            <div class="inner-form">
+                <img src="https://img.icons8.com/ios-filled/100/1e293b/fish.png" class="logo-img" alt="logo">
+                <h2 id="title">Welcome Back!</h2>
+                <p class="desc" id="subtitle">Log in to continue your journey.</p>
+
+                <form>
+                    <div class="input-box" id="user-box" style="display: none;">
+                        <label>Username</label>
+                        <input type="text" placeholder="Input Username">
+                    </div>
+                    <div class="input-box">
+                        <label>Email</label>
+                        <input type="email" placeholder="Input email">
+                    </div>
+                    <div class="input-box">
+                        <label>Password</label>
+                        <div class="pass-group">
+                            <input type="password" placeholder="Input your password" id="password-input">
+                            <span class="eye-icon" id="eye-icon" onclick="togglePassword()">👁️</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-grad" id="btn-text">Login</button>
+                </form>
+
+                <p class="legal">
+                    By continuing, you agree to Mancing <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                </p>
+
+                <div class="sep">or continue with</div>
+
+                <div class="social-grid">
+                    <button class="social-btn"><img src="https://img.icons8.com/color/20/000000/google-logo.png"> Google</button>
+                    <button class="social-btn"><img src="https://img.icons8.com/ios-filled/20/000000/mac-os.png"> Apple</button>
+                </div>
+
+                <div class="toggle-area">
+                    <span id="footer-text">Don't have an account?</span> 
+                    <span class="toggle-link" onclick="toggleForm()">Sign Up</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <div class="promo-content">
+                <h3>Catch Your Biggest Opportunities</h3>
+                <p>Unlock smarter opportunities with AI-driven recommendations.Let technology match your skills with the internships that truly fit you.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+let isSignUp = false;
+let currentImageIndex = 0;
+const images = ['pic1.png', 'pic2.png'];
+
+const btn = document.getElementById('btn-text');
+
+function togglePassword() {
+    const passwordInput = document.getElementById('password-input');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.textContent = '👁️‍🗨️';
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.textContent = '👁️';
+    }
+}
+
+function toggleForm() {
+    isSignUp = !isSignUp;
+    const title = document.getElementById('title');
+    const subtitle = document.getElementById('subtitle');
+    const userBox = document.getElementById('user-box');
+    const footerText = document.getElementById('footer-text');
+    const link = document.querySelector('.toggle-link');
+
+    if (!isSignUp) {
+        title.innerText = "Welcome Back!";
+        subtitle.innerText = "Log in to continue your journey.";
+        userBox.style.display = "none";
+        btn.innerText = "Login";
+        footerText.innerText = "Don't have an account?";
+        link.innerText = "Sign Up";
+    } else {
+        title.innerText = "Let's Catch Big Dreams!";
+        subtitle.innerText = "Create your account to start your AI journey.";
+        userBox.style.display = "block";
+        btn.innerText = "Sign Up";
+        footerText.innerText = "Already have an account?";
+        link.innerText = "Login";
+    }
+}
+
+btn.addEventListener("click", async function () {
+    const username = document.querySelector("#user-box input")?.value;
+    const email = document.querySelector("input[type='email']").value;
+    const password = document.getElementById("password-input").value;
+
+    if (!email || !password || (isSignUp && !username)) {
+        alert("Please fill all required fields");
+        return;
+    }
+
+    if (isSignUp) {
+        // SIGNUP API CALL
+        try {
+            const response = await fetch("http://localhost:8089/api/students/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: username,
+                    email: email,
+                    password: password,
+                    studentClass: "BTech",
+                    skills: "",
+                    preferredDomain: ""
+                })
+            });
+
+            const result = await response.text();
+            alert(result);
+
+            if (result.includes("successful")) {
+                toggleForm();
+            }
+
+        } catch (error) {
+            alert("Error connecting to server");
+        }
+
+    } else {
+        // LOGIN API CALL
+        try {
+            const response = await fetch("http://localhost:8089/api/students/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+
+            if (response.ok) {
+                // Backend returns user object on successful login
+                const userData = await response.json();
+                
+                if (userData && userData.email) {
+                    // Login successful - user data received
+                    localStorage.setItem("userEmail", userData.email);
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("Invalid email or password");
+                }
+            } else {
+                alert("Invalid email or password");
+            }
+
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Error connecting to server");
+        }
+    }
+});
+
+function cycleImages() {
+    const imageContainer = document.querySelector('.image-container');
+    imageContainer.style.backgroundImage = `url('${images[currentImageIndex]}')`;
+    currentImageIndex = (currentImageIndex + 1) % images.length;
+}
+
+cycleImages();
+setInterval(cycleImages, 5000);
+</script>
+</body>
+</html>
