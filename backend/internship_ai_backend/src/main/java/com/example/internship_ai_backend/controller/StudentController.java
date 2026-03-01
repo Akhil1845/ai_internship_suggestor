@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.internship_ai_backend.dto.SocialAnalyticsResponse;
 import com.example.internship_ai_backend.entity.Student;
+import com.example.internship_ai_backend.service.SocialAnalyticsService;
 import com.example.internship_ai_backend.service.StudentService;
 
 import java.util.ArrayList;
@@ -20,6 +22,9 @@ public class StudentController {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private SocialAnalyticsService socialAnalyticsService;
 
     // ===================== SIGNUP =====================
     @PostMapping("/signup")
@@ -116,5 +121,17 @@ public class StudentController {
                 studentService.getSocialProfiles(email);
 
         return ResponseEntity.ok(profiles);
+    }
+
+    // ===================== GET SOCIAL ANALYTICS =====================
+    @GetMapping("/social/analytics")
+    public ResponseEntity<SocialAnalyticsResponse> getSocialAnalytics(
+            @RequestParam String email,
+            @RequestParam String platform) {
+
+        SocialAnalyticsResponse analytics =
+                socialAnalyticsService.getAnalytics(email, platform);
+
+        return ResponseEntity.ok(analytics);
     }
 }

@@ -504,7 +504,14 @@
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 10px;
-            margin: 8px 0 18px;
+            margin: 8px 0 12px;
+        }
+
+        .analytics-info {
+            margin-bottom: 14px;
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 600;
         }
 
         .analytics-stat {
@@ -634,6 +641,8 @@ if (!userEmail) window.location.href = "user_login.html";
             </div>
         </div>
 
+        <div id="analyticsInfo" class="analytics-info">Fetching real analytics...</div>
+
         <div class="chart-card">
             <canvas id="barChart"></canvas>
         </div>
@@ -762,44 +771,6 @@ let socialProfiles = [];
 let barChartInstance;
 let lineChartInstance;
 
-const platformDemoAnalytics = {
-    linkedin: {
-        problemsData: [18, 12, 4],
-        ratingHistory: [420, 480, 520, 600, 670],
-        problemsAttempted: 34,
-        contests: 7,
-        streak: 12
-    },
-    github: {
-        problemsData: [45, 22, 11],
-        ratingHistory: [980, 1100, 1250, 1380, 1510],
-        problemsAttempted: 78,
-        contests: 10,
-        streak: 19
-    },
-    leetcode: {
-        problemsData: [190, 120, 54],
-        ratingHistory: [1300, 1420, 1510, 1630, 1760],
-        problemsAttempted: 364,
-        contests: 21,
-        streak: 46
-    },
-    codechef: {
-        problemsData: [130, 82, 36],
-        ratingHistory: [1160, 1240, 1370, 1480, 1580],
-        problemsAttempted: 248,
-        contests: 16,
-        streak: 31
-    },
-    hackerrank: {
-        problemsData: [98, 66, 28],
-        ratingHistory: [1080, 1200, 1330, 1450, 1520],
-        problemsAttempted: 192,
-        contests: 13,
-        streak: 24
-    }
-};
-
 function selectPlatform(platform, key) {
     // Removed - users add profiles from Profile page instead
 }
@@ -812,68 +783,120 @@ function removeSocialProfile(platform) {
     // Removed - users remove profiles from Profile page instead
 }
 
-function openAnalytics(platformKey, platformName) {
+function resetAnalyticsCharts() {
+    if (barChartInstance) {
+        barChartInstance.destroy();
+        barChartInstance = null;
+    }
+
+    if (lineChartInstance) {
+        lineChartInstance.destroy();
+        lineChartInstance = null;
+    }
+}
+
+async function openAnalytics(platformKey, platformName) {
     const modal = document.getElementById("analyticsModal");
-    const data = platformDemoAnalytics[platformKey] || platformDemoAnalytics.github;
-
-    document.getElementById("analyticsTitle").innerText = `${platformName} Analytics`;
-    document.getElementById("statProblems").innerText = data.problemsAttempted;
-    document.getElementById("statContests").innerText = data.contests;
-    document.getElementById("statStreak").innerText = `${data.streak} days`;
-
-    if (barChartInstance) barChartInstance.destroy();
-    if (lineChartInstance) lineChartInstance.destroy();
-
-    barChartInstance = new Chart(document.getElementById("barChart"), {
-        type: "bar",
-        data: {
-            labels: ["Easy", "Medium", "Hard"],
-            datasets: [{
-                label: "Problems Solved",
-                data: data.problemsData,
-                backgroundColor: ["#fbbf24", "#fb923c", "#f97316"],
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                }
-            }
-        }
-    });
-
-    lineChartInstance = new Chart(document.getElementById("lineChart"), {
-        type: "line",
-        data: {
-            labels: ["Contest 1", "Contest 2", "Contest 3", "Contest 4", "Contest 5"],
-            datasets: [{
-                label: "Rating Growth",
-                data: data.ratingHistory,
-                fill: false,
-                tension: 0.35,
-                borderColor: "#ff8c05",
-                backgroundColor: "#ff8c05",
-                pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true }
-            }
-        }
-    });
+    const info = document.getElementById("analyticsInfo");
 
     modal.style.display = "flex";
+    document.getElementById("analyticsTitle").innerText = `${platformName} Analytics`;
+    document.getElementById("statProblems").innerText = "--";
+    document.getElementById("statContests").innerText = "--";
+    document.getElementById("statStreak").innerText = "--";
+    info.innerText = "Fetching real analytics...";
+
+    resetAnalyticsCharts();
+
+    try {
+        const response = await fetch(
+            `http://localhost:8089/api/students/social/analytics?email=${encodeURIComponent(userEmail)}&platform=${encodeURIComponent(platformKey)}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const barLabels = Array.isArray(data.barLabels) ? data.barLabels : [];
+        const barData = Array.isArray(data.barData) ? data.barData : [];
+        const lineLabels = Array.isArray(data.lineLabels) ? data.lineLabels : [];
+        const lineData = Array.isArray(data.lineData) ? data.lineData : [];
+
+        document.getElementById("statProblems").innerText = Number.isFinite(data.problemsAttempted) ? data.problemsAttempted : 0;
+        document.getElementById("statContests").innerText = Number.isFinite(data.contestStats) ? data.contestStats : 0;
+        const streakValue = Number.isFinite(data.activityStreak) ? data.activityStreak : 0;
+        document.getElementById("statStreak").innerText = `${streakValue} days`;
+
+        const sourceText = data.source ? `Source: ${data.source}` : "Source: API";
+        const messageText = data.message ? ` | ${data.message}` : "";
+        info.innerText = `${sourceText}${messageText}`;
+
+        if (barLabels.length > 0 && barData.length > 0) {
+            barChartInstance = new Chart(document.getElementById("barChart"), {
+                type: "bar",
+                data: {
+                    labels: barLabels,
+                    datasets: [{
+                        label: `${platformName} Metrics`,
+                        data: barData,
+                        backgroundColor: ["#fbbf24", "#fb923c", "#f97316", "#fdba74", "#fb7185"],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+
+        if (lineLabels.length > 0 && lineData.length > 0) {
+            lineChartInstance = new Chart(document.getElementById("lineChart"), {
+                type: "line",
+                data: {
+                    labels: lineLabels,
+                    datasets: [{
+                        label: `${platformName} Growth`,
+                        data: lineData,
+                        fill: false,
+                        tension: 0.35,
+                        borderColor: "#ff8c05",
+                        backgroundColor: "#ff8c05",
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+        }
+
+        if (barLabels.length === 0 && lineLabels.length === 0) {
+            info.innerText = "No real analytics data available for this platform/profile yet.";
+        }
+    } catch (error) {
+        console.error("Error fetching analytics:", error);
+        info.innerText = "Failed to fetch real analytics. Check backend server/API availability and profile link validity.";
+        document.getElementById("statProblems").innerText = "0";
+        document.getElementById("statContests").innerText = "0";
+        document.getElementById("statStreak").innerText = "0 days";
+        resetAnalyticsCharts();
+    }
 }
 
 function closeAnalytics() {
