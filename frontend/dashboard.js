@@ -309,49 +309,75 @@ async function uploadCertificate() {
 
 function displayVerificationResult(result) {
     const status = result.status || "UNKNOWN";
-    const message = result.message || "Verification completed";
-    const score = result.verificationScore || 0;
-    const details = result.details || "";
+    const reason = result.reason || "Verification completed";
+    const licenseId = result.licenseId || null;
+    const score = result.verificationScore || null; // For old format compatibility
 
-    let icon, color, title;
+    let icon, color, title, statusClass;
     
-    if (status === "VERIFIED") {
+    // New MongoDB certificate format
+    if (status === "REAL") {
+        icon = "✓";
+        color = "#10b981";
+        title = "✓ Certificate is REAL";
+        statusClass = "verified";
+    } else if (status === "SUSPICIOUS") {
+        icon = "⚠";
+        color = "#f59e0b";
+        title = "⚠ Certificate is SUSPICIOUS";
+        statusClass = "suspicious";
+    } else if (status === "FAKE") {
+        icon = "✗";
+        color = "#ef4444";
+        title = "✗ Certificate is FAKE";
+        statusClass = "fake";
+    } else if (status === "VERIFIED") {
+        // Old format compatibility
         icon = "✓";
         color = "#10b981";
         title = "Certificate Verified";
-    } else if (status === "LIKELY_VALID") {
-        icon = "⚠";
-        color = "#f59e0b";
-        title = "Certificate Likely Valid";
+        statusClass = "verified";
     } else {
-        icon = "✗";
-        color = "#ef4444";
-        title = "Certificate Suspicious";
+        icon = "?";
+        color = "#6b7280";
+        title = "Unknown Status";
+        statusClass = "unknown";
+    }
+
+    // Build details section based on format
+    let detailsHtml = `<strong>Details:</strong><br>${reason}`;
+    if (licenseId) {
+        detailsHtml += `<br><strong>License ID:</strong> ${licenseId}`;
     }
 
     const modalHtml = `
         <div class="verification-modal" onclick="closeVerificationModal(event)">
-            <div class="verification-content" onclick="event.stopPropagation()">
+            <div class="verification-content ${statusClass}" onclick="event.stopPropagation()">
                 <div class="verification-header" style="border-color: ${color}">
-                    <span class="verification-icon" style="color: ${color}">${icon}</span>
-                    <h3>${title}</h3>
+                    <span class="verification-icon" style="color: ${color}; font-size: 24px; font-weight: bold;">${icon}</span>
+                    <h3 style="margin: 0; color: ${color};">${title}</h3>
                     <button class="close-btn" onclick="closeVerificationModal()">×</button>
                 </div>
                 <div class="verification-body">
+                    ${score !== null ? `
                     <div class="verification-score" style="border-color: ${color}">
                         <span class="score-label">Verification Score</span>
                         <span class="score-value" style="color: ${color}">${score}/100</span>
                     </div>
-                    <div class="verification-message">${message}</div>
+                    ` : ''}
+                    <div class="verification-message" style="border-left: 4px solid ${color}; padding-left: 12px; margin: 16px 0;">
+                        ${reason}
+                    </div>
                     <div class="verification-details">
-                        <strong>Analysis Details:</strong><br>
-                        ${details}
+                        ${detailsHtml}
                     </div>
+                    ${result.filename ? `
                     <div class="verification-file-info">
-                        <strong>File:</strong> ${result.filename || 'N/A'}<br>
-                        <strong>Size:</strong> ${(result.fileSize / 1024).toFixed(2)} KB<br>
-                        <strong>Type:</strong> ${result.fileType || 'N/A'}
+                        <strong>File:</strong> ${result.filename}<br>
+                        ${result.fileSize ? `<strong>Size:</strong> ${(result.fileSize / 1024).toFixed(2)} KB<br>` : ''}
+                        ${result.fileType ? `<strong>Type:</strong> ${result.fileType}` : ''}
                     </div>
+                    ` : ''}
                 </div>
             </div>
         </div>
