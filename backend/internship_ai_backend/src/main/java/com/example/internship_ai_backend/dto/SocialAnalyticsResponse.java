@@ -1,7 +1,9 @@
 package com.example.internship_ai_backend.dto;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SocialAnalyticsResponse {
 
@@ -18,6 +20,16 @@ public class SocialAnalyticsResponse {
     private Integer problemsAttempted = 0;
     private Integer contestStats = 0;
     private Integer activityStreak = 0;
+    private Map<String, String> highlights = new LinkedHashMap<>();
+    private Map<String, Integer> heatmap = new LinkedHashMap<>();
+
+    private String username;
+    private String profilePhotoUrl;
+    private Integer totalConnections = 0;
+    private Integer totalPosts = 0;
+    private String lastPost;
+    private List<String> solvedQuestions = new ArrayList<>();
+    private String solvedQuestionsNote;
 
     public String getPlatform() {
         return platform;
@@ -105,5 +117,77 @@ public class SocialAnalyticsResponse {
 
     public void setActivityStreak(Integer activityStreak) {
         this.activityStreak = activityStreak;
+    }
+
+    public Map<String, String> getHighlights() {
+        return highlights;
+    }
+
+    public void setHighlights(Map<String, String> highlights) {
+        this.highlights = highlights;
+    }
+
+    public Map<String, Integer> getHeatmap() {
+        return heatmap;
+    }
+
+    public void setHeatmap(Map<String, Integer> heatmap) {
+        this.heatmap = heatmap;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
+    }
+
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
+    }
+
+    public Integer getTotalConnections() {
+        return totalConnections;
+    }
+
+    public void setTotalConnections(Integer totalConnections) {
+        this.totalConnections = totalConnections;
+    }
+
+    public Integer getTotalPosts() {
+        return totalPosts;
+    }
+
+    public void setTotalPosts(Integer totalPosts) {
+        this.totalPosts = totalPosts;
+    }
+
+    public String getLastPost() {
+        return lastPost;
+    }
+
+    public void setLastPost(String lastPost) {
+        this.lastPost = lastPost;
+    }
+
+    public List<String> getSolvedQuestions() {
+        return solvedQuestions;
+    }
+
+    public void setSolvedQuestions(List<String> solvedQuestions) {
+        this.solvedQuestions = solvedQuestions;
+    }
+
+    public String getSolvedQuestionsNote() {
+        return solvedQuestionsNote;
+    }
+
+    public void setSolvedQuestionsNote(String solvedQuestionsNote) {
+        this.solvedQuestionsNote = solvedQuestionsNote;
     }
 }

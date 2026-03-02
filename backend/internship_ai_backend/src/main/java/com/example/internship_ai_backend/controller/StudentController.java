@@ -3,10 +3,17 @@ package com.example.internship_ai_backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.internship_ai_backend.dto.ResumeRecommendationsResponse;
 import com.example.internship_ai_backend.dto.SocialAnalyticsResponse;
+import com.example.internship_ai_backend.dto.MatchedInternshipDTO;
 import com.example.internship_ai_backend.entity.Student;
+import com.example.internship_ai_backend.service.InternshipRecommendationService;
+import com.example.internship_ai_backend.service.InternshipMatchingService;
+import com.example.internship_ai_backend.service.CertificateVerificationService;
 import com.example.internship_ai_backend.service.SocialAnalyticsService;
 import com.example.internship_ai_backend.service.StudentService;
 
@@ -25,6 +32,15 @@ public class StudentController {
 
     @Autowired
     private SocialAnalyticsService socialAnalyticsService;
+
+    @Autowired
+    private InternshipRecommendationService internshipRecommendationService;
+
+    @Autowired
+    private InternshipMatchingService internshipMatchingService;
+
+    @Autowired
+    private CertificateVerificationService certificateVerificationService;
 
     // ===================== SIGNUP =====================
     @PostMapping("/signup")
@@ -134,4 +150,48 @@ public class StudentController {
 
         return ResponseEntity.ok(analytics);
     }
+
+        // ===================== RESUME RECOMMENDATIONS =====================
+        @PostMapping(value = "/resume/recommendations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<ResumeRecommendationsResponse> getResumeRecommendations(
+                        @RequestParam String email,
+                        @RequestPart("resume") MultipartFile resume) {
+
+                ResumeRecommendationsResponse recommendations =
+                                internshipRecommendationService.getRecommendationsFromResume(email, resume);
+
+                return ResponseEntity.ok(recommendations);
+        }
+
+        // ===================== MATCH INTERNSHIPS =====================
+        @GetMapping("/internships/match")
+        public ResponseEntity<List<MatchedInternshipDTO>> getMatchedInternships(
+                        @RequestParam String email) {
+
+                List<MatchedInternshipDTO> matchedInternships =
+                                internshipMatchingService.matchInternships(email);
+
+                return ResponseEntity.ok(matchedInternships);
+        }
+
+        // ===================== GET ALL INTERNSHIPS =====================
+        @GetMapping("/internships/all")
+        public ResponseEntity<List<MatchedInternshipDTO>> getAllInternships() {
+
+                List<MatchedInternshipDTO> allInternships =
+                                internshipMatchingService.getAllInternships();
+
+                return ResponseEntity.ok(allInternships);
+        }
+
+        // ===================== VERIFY CERTIFICATE =====================
+        @PostMapping(value = "/certificate/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<Map<String, Object>> verifyCertificate(
+                        @RequestPart("certificate") MultipartFile certificate) {
+
+                Map<String, Object> verificationResult =
+                                certificateVerificationService.verifyCertificate(certificate);
+
+                return ResponseEntity.ok(verificationResult);
+        }
 }
