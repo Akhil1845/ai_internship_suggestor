@@ -265,8 +265,108 @@ function renderMatchedInternships(internships) {
     container.innerHTML = `<div class="matched-internships-grid">${html}</div>`;
 }
 
-function uploadCertificate() {
-    alert("Certificate verification is not integrated yet.");
+async function uploadCertificate() {
+    const fileInput = document.getElementById("certificateFile");
+    const uploadButton = document.querySelector("button[onclick='uploadCertificate()']");
+    const file = fileInput?.files?.[0];
+
+    if (!file) {
+        alert("Please choose your certificate first.");
+        return;
+    }
+
+    if (uploadButton) {
+        uploadButton.disabled = true;
+        uploadButton.innerText = "Verifying...";
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append("certificate", file);
+
+        const response = await fetch("http://localhost:8089/api/students/certificate/verify", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error("Verification failed");
+        }
+
+        displayVerificationResult(result);
+    } catch (error) {
+        console.error("Certificate verification error:", error);
+        alert("Failed to verify certificate. Please try again.");
+    } finally {
+        if (uploadButton) {
+            uploadButton.disabled = false;
+            uploadButton.innerText = "Upload Certificate";
+        }
+    }
+}
+
+function displayVerificationResult(result) {
+    const status = result.status || "UNKNOWN";
+    const message = result.message || "Verification completed";
+    const score = result.verificationScore || 0;
+    const details = result.details || "";
+
+    let icon, color, title;
+    
+    if (status === "VERIFIED") {
+        icon = "✓";
+        color = "#10b981";
+        title = "Certificate Verified";
+    } else if (status === "LIKELY_VALID") {
+        icon = "⚠";
+        color = "#f59e0b";
+        title = "Certificate Likely Valid";
+    } else {
+        icon = "✗";
+        color = "#ef4444";
+        title = "Certificate Suspicious";
+    }
+
+    const modalHtml = `
+        <div class="verification-modal" onclick="closeVerificationModal(event)">
+            <div class="verification-content" onclick="event.stopPropagation()">
+                <div class="verification-header" style="border-color: ${color}">
+                    <span class="verification-icon" style="color: ${color}">${icon}</span>
+                    <h3>${title}</h3>
+                    <button class="close-btn" onclick="closeVerificationModal()">×</button>
+                </div>
+                <div class="verification-body">
+                    <div class="verification-score" style="border-color: ${color}">
+                        <span class="score-label">Verification Score</span>
+                        <span class="score-value" style="color: ${color}">${score}/100</span>
+                    </div>
+                    <div class="verification-message">${message}</div>
+                    <div class="verification-details">
+                        <strong>Analysis Details:</strong><br>
+                        ${details}
+                    </div>
+                    <div class="verification-file-info">
+                        <strong>File:</strong> ${result.filename || 'N/A'}<br>
+                        <strong>Size:</strong> ${(result.fileSize / 1024).toFixed(2)} KB<br>
+                        <strong>Type:</strong> ${result.fileType || 'N/A'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeVerificationModal(event) {
+    if (!event || event.target.classList.contains('verification-modal') || event.target.classList.contains('close-btn')) {
+        const modal = document.querySelector('.verification-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
 }
 
 /* WELCOME ANIMATION */
