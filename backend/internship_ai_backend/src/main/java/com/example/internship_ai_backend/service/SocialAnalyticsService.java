@@ -179,12 +179,6 @@ public class SocialAnalyticsService {
         response.setHighlights(buildGithubHighlights(username, repos, followers, totalCommits, streak));
         response.setHeatmap(buildLastYearHeatmap(dailyActivity));
 
-        socialProfile.setRepositoriesCount(repos);
-        socialProfile.setFollowers(followers);
-        socialProfile.setTotalCommits(totalCommits);
-        socialProfile.setDaysActive(streak);
-        socialProfileRepository.save(socialProfile);
-
         return response;
     }
 
@@ -299,7 +293,7 @@ public class SocialAnalyticsService {
             // Get current year as reference
             int year = LocalDate.now().getYear();
             
-            // Try parsing with different formats
+            // Try parsing with different formatsv
             java.text.SimpleDateFormat[] formats = {
                 new java.text.SimpleDateFormat("MMMM d", java.util.Locale.ENGLISH),
                 new java.text.SimpleDateFormat("MMM d", java.util.Locale.ENGLISH),
@@ -467,12 +461,6 @@ public class SocialAnalyticsService {
             ? "No recent solved questions were found on this public profile."
             : "Recent accepted LeetCode questions");
 
-        socialProfile.setProblemsSolved(totalSolved);
-        socialProfile.setContestRating(contestRating);
-        socialProfile.setGlobalRank(globalRank);
-        socialProfile.setDaysActive(totalActiveDays);
-        socialProfileRepository.save(socialProfile);
-
         return response;
     }
 
@@ -534,17 +522,17 @@ public class SocialAnalyticsService {
         response.setBarLabels(List.of("Solved Questions", "Current Rating", "Activity Days"));
         response.setBarData(List.of(
                 solvedQuestions.size(),
-                safe(socialProfile.getContestRating()),
-                safe(socialProfile.getDaysActive())
+                0,
+                0
         ));
         response.setLineLabels(List.of("Current"));
-        response.setLineData(List.of(safe(socialProfile.getContestRating())));
+        response.setLineData(List.of(0));
         response.setHighlights(buildCodingHighlights(
                 username,
-                safe(socialProfile.getProblemsSolved()),
                 0,
-                safe(socialProfile.getContestRating()),
-                safe(socialProfile.getContestRating())
+                0,
+                0,
+                0
         ));
         response.setHeatmap(new LinkedHashMap<>());
 
@@ -613,13 +601,10 @@ public class SocialAnalyticsService {
             }
 
             String html = pageResponse.body();
-            int liveConnections = extractLinkedInConnections(html, safe(socialProfile.getConnections()));
-            int livePosts = extractLinkedInPosts(html, safe(socialProfile.getPosts()));
+            int liveConnections = extractLinkedInConnections(html, 0);
+            int livePosts = extractLinkedInPosts(html, 0);
 
-            socialProfile.setProfileUrl(effectiveProfileUrl);
             socialProfile.setUsername(username);
-            socialProfile.setConnections(liveConnections);
-            socialProfile.setPosts(livePosts);
             socialProfileRepository.save(socialProfile);
 
             response.setSource("LIVE");
@@ -660,25 +645,20 @@ public class SocialAnalyticsService {
 
         if (socialProfile.getPlatform() == Platform.GITHUB) {
             response.setBarLabels(List.of("Repositories", "Followers", "Commits"));
-            response.setBarData(List.of(
-                    safe(socialProfile.getRepositoriesCount()),
-                    safe(socialProfile.getFollowers()),
-                    safe(socialProfile.getTotalCommits())
-            ));
-
+            response.setBarData(List.of(0, 0, 0));
             response.setLineLabels(List.of("Current"));
-            response.setLineData(List.of(safe(socialProfile.getTotalCommits())));
-            response.setProblemsAttempted(safe(socialProfile.getRepositoriesCount()));
-            response.setContestStats(safe(socialProfile.getTotalCommits()));
-            response.setActivityStreak(safe(socialProfile.getDaysActive()));
-                response.setHighlights(buildGithubHighlights(
+            response.setLineData(List.of(0));
+            response.setProblemsAttempted(0);
+            response.setContestStats(0);
+            response.setActivityStreak(0);
+            response.setHighlights(buildGithubHighlights(
                     resolveUsername(socialProfile),
-                    safe(socialProfile.getRepositoriesCount()),
-                    safe(socialProfile.getFollowers()),
-                    safe(socialProfile.getTotalCommits()),
-                    safe(socialProfile.getDaysActive())
-                ));
-                    response.setHeatmap(new LinkedHashMap<>());
+                    0,
+                    0,
+                    0,
+                    0
+            ));
+            response.setHeatmap(new LinkedHashMap<>());
             return response;
         }
 
@@ -687,43 +667,38 @@ public class SocialAnalyticsService {
                 response.setBarData(List.of());
                 response.setLineLabels(List.of());
                 response.setLineData(List.of());
-                response.setProblemsAttempted(safe(socialProfile.getConnections()));
-                response.setContestStats(safe(socialProfile.getPosts()));
-                response.setActivityStreak(safe(socialProfile.getDaysActive()));
+                response.setProblemsAttempted(0);
+                response.setContestStats(0);
+                response.setActivityStreak(0);
 
                 String username = resolveUsername(socialProfile);
                 response.setUsername(username);
-                response.setTotalConnections(safe(socialProfile.getConnections()));
-                response.setTotalPosts(safe(socialProfile.getPosts()));
+                response.setTotalConnections(0);
+                response.setTotalPosts(0);
                 response.setProfilePhotoUrl(buildProfilePhotoFallback(username));
                 response.setLastPost("Last post content is not exposed by LinkedIn public APIs in this setup.");
                 response.setHighlights(buildLinkedInHighlights(
                     username,
-                    safe(socialProfile.getConnections()),
-                    safe(socialProfile.getPosts())
+                    0,
+                    0
                 ));
                 response.setHeatmap(new LinkedHashMap<>());
                 return response;
             }
 
         response.setBarLabels(List.of("Problems Solved", "Contest Rating", "Global Rank"));
-        response.setBarData(List.of(
-                safe(socialProfile.getProblemsSolved()),
-                safe(socialProfile.getContestRating()),
-                safe(socialProfile.getGlobalRank())
-        ));
-
+        response.setBarData(List.of(0, 0, 0));
         response.setLineLabels(List.of("Current"));
-        response.setLineData(List.of(safe(socialProfile.getContestRating())));
-        response.setProblemsAttempted(safe(socialProfile.getProblemsSolved()));
-        response.setContestStats(safe(socialProfile.getContestRating()));
-        response.setActivityStreak(safe(socialProfile.getDaysActive()));
+        response.setLineData(List.of(0));
+        response.setProblemsAttempted(0);
+        response.setContestStats(0);
+        response.setActivityStreak(0);
         response.setHighlights(buildCodingHighlights(
                 resolveUsername(socialProfile),
-                safe(socialProfile.getProblemsSolved()),
                 0,
-                safe(socialProfile.getContestRating()),
-                safe(socialProfile.getContestRating())
+                0,
+                0,
+                0
         ));
         response.setHeatmap(new LinkedHashMap<>());
         response.setMessage(message + " Save/refresh this platform data source to improve metrics.");
