@@ -11,6 +11,1150 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: #1f2937;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .project-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .gold-text {
+            color: #f59e0b;
+        }
+
+        .nav-right button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .nav-right button:hover {
+            background: #2563eb;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            height: calc(100vh - 70px);
+        }
+
+        /* LEFT SIDEBAR */
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            color: #6b7280;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .template-option {
+            aspect-ratio: 3/4;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s;
+            position: relative;
+            background: white;
+        }
+
+        .template-option:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .template-option.active {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.2);
+        }
+
+        .template-preview {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .template-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f59e0b;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 4px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .btn-small {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .btn-small:hover {
+            background: #2563eb;
+        }
+
+        .entry {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 3px solid #3b82f6;
+            font-size: 12px;
+        }
+
+        .entry-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .entry-subtitle {
+            color: #6b7280;
+            font-size: 11px;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        /* RIGHT PREVIEW */
+        .preview-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .preview-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .preview-btn:hover {
+            background: #2563eb;
+        }
+
+        .preview-btn.secondary {
+            background: #6b7280;
+        }
+
+        .preview-btn.secondary:hover {
+            background: #4b5563;
+        }
+
+        .preview-content {
+            flex: 1;
+            overflow-y: auto;
+            background: white;
+        }
+
+        /* CUSTOMIZATION STYLES */
+        .custom-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .option-btn {
+            padding: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+        }
+
+        .option-btn.active {
+            border-color: #f59e0b;
+            background: #fffbf0;
+            color: #f59e0b;
+        }
+
+        .color-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+        }
+
+        .font-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .font-option {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .font-option:hover {
+            border-color: #3b82f6;
+        }
+
+        .font-option.active {
+            border-color: #f59e0b;
+            background: #fffbf0;
+        }
+
+        .collapsible {
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible:hover {
+            background: #f0f0f0;
+        }
+
+        .collapsible.open {
+            background: #e0e7ff;
+            border-color: #3b82f6;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .collapsible-content.open {
+            display: block;
+        }
+
+        .resume-preview {
+            padding: 40px;
+            min-height: 100%;
+            background: white;
+            color: #333;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* TEMPLATE STYLES */
+        .template-modern {
+            padding: 40px;
+        }
+
+        .template-modern .name {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1f2937;
+        }
+
+        .template-modern .title {
+            font-size: 16px;
+            color: #3b82f6;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .template-modern .contact {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .template-modern .section-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        .template-modern .entry {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+        }
+
+        .template-modern .entry-name {
+            font-weight: bold;
+            color: #1f2937;
+            font-size: 13px;
+        }
+
+        .template-modern .entry-meta {
+            font-size: 12px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .template-modern .entry-desc {
+            font-size: 12px;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: #e0e7ff;
+            color: #3b82f6;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .template-classic {
+            padding: 40px;
+            background: #f9f9f9;
+        }
+
+        .template-classic .name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .template-classic .title {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .template-classic .section-header {
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+            text-transform: uppercase;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #000;
+            letter-spacing: 1px;
+        }
+
+        .template-minimal {
+            padding: 50px 40px;
+            background: white;
+        }
+
+        .template-minimal .name {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+
+        .template-minimal .title {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            .sidebar, .preview-controls, .navbar {
+                display: none;
+            }
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .preview-content {
+                overflow: visible;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="project-title"><span class="gold-text">AI</span> Resume Builder</div>
+    <div class="nav-right">
+        <button onclick="goToDashboard()">← Back</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        
+        <!-- TEMPLATES -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Templates</div>
+            <div class="template-grid">
+                <div class="template-option active" onclick="selectTemplate('modern')">
+                    <div class="template-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Modern</div>
+                </div>
+                <div class="template-option" onclick="selectTemplate('classic')">
+                    <div class="template-preview" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">Classic</div>
+                </div>
+                <div class="template-option" onclick="selectTemplate('minimal')">
+                    <div class="template-preview" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">Minimal</div>
+                </div>
+                <div class="template-option" onclick="selectTemplate('professional')">
+                    <div class="template-preview" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">Pro</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERSONAL INFO -->
+        <div class="sidebar-section">
+            <div class="section-title">Personal Info</div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="John Doe" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+                <label>Professional Title</label>
+                <input type="text" id="jobTitle" placeholder="Software Engineer" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="john@example.com" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="phone" placeholder="+1 (555) 000-0000" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" id="location" placeholder="City, Country" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+                <label>Professional Summary</label>
+                <textarea id="summary" placeholder="Write a brief summary..." oninput="updatePreview()"></textarea>
+            </div>
+        </div>
+
+        <!-- SKILLS -->
+        <div class="sidebar-section">
+            <div class="section-title">Skills</div>
+            <div class="form-group">
+                <textarea id="skills" placeholder="Java, Python, React, MongoDB..." oninput="updatePreview()"></textarea>
+            </div>
+        </div>
+
+        <!-- EXPERIENCE -->
+        <div class="sidebar-section">
+            <div class="section-title">Experience</div>
+            <button class="btn-small" onclick="addExperience()">+ Add Experience</button>
+            <div id="experienceList" style="margin-top: 8px;"></div>
+        </div>
+
+        <!-- EDUCATION -->
+        <div class="sidebar-section">
+            <div class="section-title">Education</div>
+            <button class="btn-small" onclick="addEducation()">+ Add Education</button>
+            <div id="educationList" style="margin-top: 8px;"></div>
+        </div>
+
+        <!-- PROJECTS -->
+        <div class="sidebar-section">
+            <div class="section-title">Projects</div>
+            <button class="btn-small" onclick="addProject()">+ Add Project</button>
+            <div id="projectList" style="margin-top: 8px;"></div>
+        </div>
+
+        <!-- DESIGN & CUSTOMIZE -->
+        <div class="sidebar-section">
+            <div class="section-title">Design & Customize</div>
+
+            <!-- Font Selection -->
+            <div class="collapsible" onclick="toggleCollapsible(this)">
+                🔤 Fonts <span>▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="font-list">
+                    <div class="font-option active" onclick="setFont('sans-serif', this)" style="font-family: sans-serif;">Sans Serif</div>
+                    <div class="font-option" onclick="setFont('serif', this)" style="font-family: serif;">Serif</div>
+                    <div class="font-option" onclick="setFont('monospace', this)" style="font-family: monospace;">Monospace</div>
+                    <div class="font-option" onclick="setFont('Georgia, serif', this)" style="font-family: Georgia;">Georgia</div>
+                    <div class="font-option" onclick="setFont('Trebuchet MS, sans-serif', this)" style="font-family: Trebuchet MS;">Trebuchet</div>
+                </div>
+            </div>
+
+            <!-- Color Scheme -->
+            <div class="collapsible" onclick="toggleCollapsible(this)">
+                🎨 Colors <span>▼</span>
+            </div>
+            <div class="collapsible-content">
+                <label style="font-size: 11px; font-weight: 600; margin-bottom: 6px; display: block;">Accent Color</label>
+                <div class="color-picker-grid">
+                    <div class="color-option active" style="background: #3b82f6;" onclick="setAccentColor('#3b82f6', this)"></div>
+                    <div class="color-option" style="background: #f59e0b;" onclick="setAccentColor('#f59e0b', this)"></div>
+                    <div class="color-option" style="background: #ef4444;" onclick="setAccentColor('#ef4444', this)"></div>
+                    <div class="color-option" style="background: #10b981;" onclick="setAccentColor('#10b981', this)"></div>
+                    <div class="color-option" style="background: #8b5cf6;" onclick="setAccentColor('#8b5cf6', this)"></div>
+                    <div class="color-option" style="background: #06b6d4;" onclick="setAccentColor('#06b6d4', this)"></div>
+                </div>
+                <label style="font-size: 11px; font-weight: 600; margin-top: 8px; margin-bottom: 6px; display: block;">Background</label>
+                <div class="custom-options-grid">
+                    <div class="option-btn active" onclick="setBgColor('white', this)">White</div>
+                    <div class="option-btn" onclick="setBgColor('#f9f9f9', this)">Light Gray</div>
+                </div>
+            </div>
+
+            <!-- Section Headings -->
+            <div class="collapsible" onclick="toggleCollapsible(this)">
+                📋 Section Headings <span>▼</span>
+            </div>
+            <div class="collapsible-content">
+                <label style="font-size: 11px; font-weight: 600; margin-bottom: 6px; display: block;">Style</label>
+                <div class="custom-options-grid">
+                    <div class="option-btn active" onclick="setHeadingStyle('underline', this)">Underline</div>
+                    <div class="option-btn" onclick="setHeadingStyle('uppercase', this)">Uppercase</div>
+                    <div class="option-btn" onclick="setHeadingStyle('bold', this)">Bold Only</div>
+                    <div class="option-btn" onclick="setHeadingStyle('colored', this)">Colored</div>
+                </div>
+                <label style="font-size: 11px; font-weight: 600; margin-top: 8px; margin-bottom: 6px; display: block;">Size</label>
+                <div class="custom-options-grid">
+                    <div class="option-btn" onclick="setHeadingSize('small', this)">Small</div>
+                    <div class="option-btn active" onclick="setHeadingSize('medium', this)">Medium</div>
+                    <div class="option-btn" onclick="setHeadingSize('large', this)">Large</div>
+                </div>
+            </div>
+
+            <!-- Entry Layout -->
+            <div class="collapsible" onclick="toggleCollapsible(this)">
+                📦 Entry Layout <span>▼</span>
+            </div>
+            <div class="collapsible-content">
+                <label style="font-size: 11px; font-weight: 600; margin-bottom: 6px; display: block;">Title Size</label>
+                <div class="custom-options-grid">
+                    <div class="option-btn" onclick="setEntryTitleSize('small', this)">S</div>
+                    <div class="option-btn active" onclick="setEntryTitleSize('medium', this)">M</div>
+                    <div class="option-btn" onclick="setEntryTitleSize('large', this)">L</div>
+                </div>
+                <label style="font-size: 11px; font-weight: 600; margin-top: 8px; margin-bottom: 6px; display: block;">Subtitle Style</label>
+                <div class="custom-options-grid">
+                    <div class="option-btn active" onclick="setSubtitleStyle('normal', this)">Normal</div>
+                    <div class="option-btn" onclick="setSubtitleStyle('bold', this)">Bold</div>
+                    <div class="option-btn" onclick="setSubtitleStyle('italic', this)">Italic</div>
+                </div>
+                <label style="font-size: 11px; font-weight: 600; margin-top: 8px; margin-bottom: 6px; display: block;">Spacing</label>
+                <div class="custom-options-grid">
+                    <div class="option-btn" onclick="setSpacing('compact', this)">Compact</div>
+                    <div class="option-btn active" onclick="setSpacing('normal', this)">Normal</div>
+                    <div class="option-btn" onclick="setSpacing('spacious', this)">Spacious</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview-container">
+        <div class="preview-controls">
+            <button class="preview-btn" onclick="saveResume()">💾 Save</button>
+            <button class="preview-btn secondary" onclick="printResume()">🖨️ Print/PDF</button>
+            <button class="preview-btn secondary" onclick="goToDashboard()">Cancel</button>
+        </div>
+        <div class="preview-content">
+            <div class="resume-preview template-modern" id="preview">
+                <div class="name">Your Name</div>
+                <div class="title">Professional Title</div>
+                <div class="contact">Email • Phone • Location</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const userEmail = localStorage.getItem("userEmail");
+if (!userEmail) window.location.href = "user_login.html";
+
+let currentTemplate = 'modern';
+let experienceCount = 0;
+let educationCount = 0;
+let projectCount = 0;
+
+// Customization settings
+let customization = {
+    font: 'sans-serif',
+    accentColor: '#3b82f6',
+    bgColor: 'white',
+    headingStyle: 'underline',
+    headingSize: 'medium',
+    entryTitleSize: 'medium',
+    subtitleStyle: 'normal',
+    spacing: 'normal'
+};
+
+function toggleCollapsible(el) {
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+}
+
+function setFont(font, el) {
+    customization.font = font;
+    document.querySelectorAll('.font-option').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setAccentColor(color, el) {
+    customization.accentColor = color;
+    document.querySelectorAll('.color-option').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setBgColor(color, el) {
+    customization.bgColor = color;
+    document.querySelectorAll('.option-btn').forEach(e => {
+        if (e.textContent.toLowerCase().includes('white') || e.textContent.toLowerCase().includes('gray')) {
+            e.classList.remove('active');
+        }
+    });
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setHeadingStyle(style, el) {
+    customization.headingStyle = style;
+    el.parentElement.querySelectorAll('.option-btn').forEach(e => e.classList.remove('active'));
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setHeadingSize(size, el) {
+    customization.headingSize = size;
+    el.parentElement.querySelectorAll('.option-btn').forEach(e => {
+        if (e.textContent.toLowerCase() === 'small' || e.textContent.toLowerCase() === 'medium' || e.textContent.toLowerCase() === 'large') {
+            e.classList.remove('active');
+        }
+    });
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setEntryTitleSize(size, el) {
+    customization.entryTitleSize = size;
+    el.parentElement.querySelectorAll('.option-btn').forEach(e => {
+        if (e.textContent === 'S' || e.textContent === 'M' || e.textContent === 'L') {
+            e.classList.remove('active');
+        }
+    });
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setSubtitleStyle(style, el) {
+    customization.subtitleStyle = style;
+    el.parentElement.querySelectorAll('.option-btn').forEach(e => {
+        if (e.textContent.toLowerCase() === 'normal' || e.textContent.toLowerCase() === 'bold' || e.textContent.toLowerCase() === 'italic') {
+            e.classList.remove('active');
+        }
+    });
+    el.classList.add('active');
+    updatePreview();
+}
+
+function setSpacing(spacing, el) {
+    customization.spacing = spacing;
+    el.parentElement.querySelectorAll('.option-btn').forEach(e => {
+        if (e.textContent.toLowerCase() === 'compact' || e.textContent.toLowerCase() === 'normal' || e.textContent.toLowerCase() === 'spacious') {
+            e.classList.remove('active');
+        }
+    });
+    el.classList.add('active');
+    updatePreview();
+}
+
+function selectTemplate(template) {
+    currentTemplate = template;
+    document.querySelectorAll('.template-option').forEach(el => el.classList.remove('active'));
+    event.target.closest('.template-option').classList.add('active');
+    updatePreview();
+}
+
+function goToDashboard() {
+    if (confirm("Are you sure? Any unsaved changes will be lost.")) {
+        window.location.href = "dashboard.html";
+    }
+}
+
+function logout() {
+    localStorage.removeItem("userEmail");
+    window.location.href = "user_login.html";
+}
+
+function addExperience() {
+    const id = experienceCount++;
+    const html = `
+        <div class="entry" id="exp-${id}">
+            <div class="entry-title"><input type="text" placeholder="Job Title" id="expTitle${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; font-weight: bold;"></div>
+            <div class="entry-subtitle" style="margin-top: 3px;"><input type="text" placeholder="Company" id="expCompany${id}" oninput="updatePreview()" style="width: 100%; padding: 3px; border: 1px solid #ddd; border-radius: 3px;"></div>
+            <div style="margin-top: 6px;">
+                <input type="month" id="expStart${id}" oninput="updatePreview()" style="width: 48%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px;">
+                <input type="month" id="expEnd${id}" oninput="updatePreview()" style="width: 48%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; margin-left: 4%;">
+            </div>
+            <textarea id="expDesc${id}" placeholder="Description" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; margin-top: 6px; min-height: 50px;"></textarea>
+            <button class="btn-remove" onclick="removeEntry('exp-${id}')">Remove</button>
+        </div>
+    `;
+    document.getElementById("experienceList").insertAdjacentHTML('beforeend', html);
+}
+
+function addEducation() {
+    const id = educationCount++;
+    const html = `
+        <div class="entry" id="edu-${id}">
+            <div class="entry-title"><input type="text" placeholder="Degree" id="eduDegree${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; font-weight: bold;"></div>
+            <div class="entry-subtitle" style="margin-top: 3px;"><input type="text" placeholder="School" id="eduSchool${id}" oninput="updatePreview()" style="width: 100%; padding: 3px; border: 1px solid #ddd; border-radius: 3px;"></div>
+            <div style="margin-top: 6px;">
+                <input type="number" id="eduYear${id}" placeholder="2024" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px;">
+            </div>
+            <button class="btn-remove" onclick="removeEntry('edu-${id}')">Remove</button>
+        </div>
+    `;
+    document.getElementById("educationList").insertAdjacentHTML('beforeend', html);
+}
+
+function addProject() {
+    const id = projectCount++;
+    const html = `
+        <div class="entry" id="proj-${id}">
+            <div class="entry-title"><input type="text" placeholder="Project Name" id="projName${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; font-weight: bold;"></div>
+            <div class="entry-subtitle" style="margin-top: 3px;"><input type="text" placeholder="Technologies" id="projTech${id}" oninput="updatePreview()" style="width: 100%; padding: 3px; border: 1px solid #ddd; border-radius: 3px;"></div>
+            <textarea id="projDesc${id}" placeholder="Description" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; margin-top: 6px; min-height: 50px;"></textarea>
+            <button class="btn-remove" onclick="removeEntry('proj-${id}')">Remove</button>
+        </div>
+    `;
+    document.getElementById("projectList").insertAdjacentHTML('beforeend', html);
+}
+
+function removeEntry(id) {
+    document.getElementById(id).remove();
+    updatePreview();
+}
+
+function getHeadingClass() {
+    const size = customization.headingSize === 'small' ? '12px' : customization.headingSize === 'large' ? '15px' : '14px';
+    const style = customization.headingStyle === 'uppercase' ? 'text-transform: uppercase;' : '';
+    const colored = customization.headingStyle === 'colored' ? `color: ${customization.accentColor};` : '';
+    return `style="font-size: ${size}; font-weight: bold; margin-top: 20px; margin-bottom: 12px; padding-bottom: 8px; ${customization.headingStyle === 'underline' ? `border-bottom: 2px solid ${customization.accentColor};` : ''} ${style} ${colored}"`;
+}
+
+function getEntryTitleClass() {
+    const size = customization.entryTitleSize === 'small' ? '12px' : customization.entryTitleSize === 'large' ? '15px' : '13px';
+    const fontStyle = customization.subtitleStyle === 'italic' ? 'italic' : 'normal';
+    const fontWeight = customization.subtitleStyle === 'bold' ? 'bold' : 'normal';
+    return `style="font-weight: ${fontWeight}; color: #1f2937; font-size: ${size}; font-style: ${fontStyle};"`;
+}
+
+function getSpacingStyle() {
+    const margins = {
+        compact: '8px',
+        normal: '12px',
+        spacious: '16px'
+    };
+    return margins[customization.spacing] || '12px';
+}
+
+function updatePreview() {
+    const fullName = document.getElementById("fullName").value || "Your Name";
+    const jobTitle = document.getElementById("jobTitle").value || "Professional Title";
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const location = document.getElementById("location").value;
+    const summary = document.getElementById("summary").value;
+    const skills = document.getElementById("skills").value;
+
+    let contact = [];
+    if (email) contact.push(email);
+    if (phone) contact.push(phone);
+    if (location) contact.push(location);
+
+    const preview = document.getElementById("preview");
+    const templateClass = `template-${currentTemplate}`;
+    preview.className = `resume-preview ${templateClass}`;
+    preview.style.fontFamily = customization.font;
+    preview.style.backgroundColor = customization.bgColor;
+
+    const marginBottom = getSpacingStyle();
+
+    let html = `
+        <div class="name">${fullName}</div>
+        <div class="title">${jobTitle}</div>
+        <div class="contact">${contact.join(' • ')}</div>
+    `;
+
+    if (summary) {
+        html += `<div style="margin-top: 15px; margin-bottom: ${marginBottom}; font-size: 13px; line-height: 1.5;">${summary}</div>`;
+    }
+
+    if (skills) {
+        const skillsList = skills.split(',').map(s => s.trim()).filter(s => s);
+        html += `<div class="section-header" ${getHeadingClass()}>Skills</div><div class="skills-container">`;
+        html += skillsList.map(skill => `<span class="skill-tag" style="background: ${customization.accentColor}22; color: ${customization.accentColor};">${skill}</span>`).join('');
+        html += '</div>';
+    }
+
+    // Experience
+    let hasExp = false;
+    let expHtml = `<div class="section-header" ${getHeadingClass()}>Experience</div>`;
+    for (let i = 0; i < experienceCount; i++) {
+        const title = document.getElementById(`expTitle${i}`)?.value;
+        const company = document.getElementById(`expCompany${i}`)?.value;
+        const start = document.getElementById(`expStart${i}`)?.value;
+        const end = document.getElementById(`expEnd${i}`)?.value;
+        const desc = document.getElementById(`expDesc${i}`)?.value;
+        
+        if (title || company) {
+            hasExp = true;
+            expHtml += `
+                <div class="entry" style="margin-bottom: ${marginBottom};">
+                    <div class="entry-name" ${getEntryTitleClass()}>${title}</div>
+                    <div class="entry-meta">${company} ${start ? '• ' + start : ''} ${end ? '– ' + end : ''}</div>
+                    ${desc ? `<div class="entry-desc">${desc}</div>` : ''}
+                </div>
+            `;
+        }
+    }
+    if (hasExp) html += expHtml;
+
+    // Education
+    let hasEdu = false;
+    let eduHtml = `<div class="section-header" ${getHeadingClass()}>Education</div>`;
+    for (let i = 0; i < educationCount; i++) {
+        const degree = document.getElementById(`eduDegree${i}`)?.value;
+        const school = document.getElementById(`eduSchool${i}`)?.value;
+        const year = document.getElementById(`eduYear${i}`)?.value;
+        
+        if (degree || school) {
+            hasEdu = true;
+            eduHtml += `
+                <div class="entry" style="margin-bottom: ${marginBottom};">
+                    <div class="entry-name" ${getEntryTitleClass()}>${degree}</div>
+                    <div class="entry-meta">${school} ${year ? '(' + year + ')' : ''}</div>
+                </div>
+            `;
+        }
+    }
+    if (hasEdu) html += eduHtml;
+
+    // Projects
+    let hasProj = false;
+    let projHtml = `<div class="section-header" ${getHeadingClass()}>Projects</div>`;
+    for (let i = 0; i < projectCount; i++) {
+        const name = document.getElementById(`projName${i}`)?.value;
+        const tech = document.getElementById(`projTech${i}`)?.value;
+        const desc = document.getElementById(`projDesc${i}`)?.value;
+        
+        if (name) {
+            hasProj = true;
+            projHtml += `
+                <div class="entry" style="margin-bottom: ${marginBottom};">
+                    <div class="entry-name" ${getEntryTitleClass()}>${name}</div>
+                    ${tech ? `<div class="entry-meta">${tech}</div>` : ''}
+                    ${desc ? `<div class="entry-desc">${desc}</div>` : ''}
+                </div>
+            `;
+        }
+    }
+    if (hasProj) html += projHtml;
+
+    preview.innerHTML = html;
+}
+
+function saveResume() {
+    const resumeData = {
+        fullName: document.getElementById("fullName").value,
+        jobTitle: document.getElementById("jobTitle").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        location: document.getElementById("location").value,
+        summary: document.getElementById("summary").value,
+        skills: document.getElementById("skills").value,
+        template: currentTemplate,
+        customization: customization,
+        experience: [],
+        education: [],
+        projects: []
+    };
+
+    for (let i = 0; i < experienceCount; i++) {
+        const title = document.getElementById(`expTitle${i}`)?.value;
+        if (title) {
+            resumeData.experience.push({
+                title,
+                company: document.getElementById(`expCompany${i}`)?.value || '',
+                start: document.getElementById(`expStart${i}`)?.value || '',
+                end: document.getElementById(`expEnd${i}`)?.value || '',
+                description: document.getElementById(`expDesc${i}`)?.value || ''
+            });
+        }
+    }
+
+    for (let i = 0; i < educationCount; i++) {
+        const degree = document.getElementById(`eduDegree${i}`)?.value;
+        if (degree) {
+            resumeData.education.push({
+                degree,
+                school: document.getElementById(`eduSchool${i}`)?.value || '',
+                year: document.getElementById(`eduYear${i}`)?.value || ''
+            });
+        }
+    }
+
+    for (let i = 0; i < projectCount; i++) {
+        const name = document.getElementById(`projName${i}`)?.value;
+        if (name) {
+            resumeData.projects.push({
+                name,
+                technologies: document.getElementById(`projTech${i}`)?.value || '',
+                description: document.getElementById(`projDesc${i}`)?.value || ''
+            });
+        }
+    }
+
+    localStorage.setItem(userEmail + "_resume", JSON.stringify(resumeData));
+    alert("✅ Resume saved successfully!");
+}
+
+function printResume() {
+    window.print();
+}
+
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem(userEmail + "_resume");
+    if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById("fullName").value = data.fullName || '';
+        document.getElementById("jobTitle").value = data.jobTitle || '';
+        document.getElementById("email").value = data.email || '';
+        document.getElementById("phone").value = data.phone || '';
+        document.getElementById("location").value = data.location || '';
+        document.getElementById("summary").value = data.summary || '';
+        document.getElementById("skills").value = data.skills || '';
+
+        // Load customization
+        if (data.customization) {
+            customization = { ...customization, ...data.customization };
+        }
+
+        data.experience?.forEach(() => addExperience());
+        data.education?.forEach(() => addEducation());
+        data.projects?.forEach(() => addProject());
+
+        data.experience?.forEach((exp, i) => {
+            document.getElementById(`expTitle${i}`).value = exp.title;
+            document.getElementById(`expCompany${i}`).value = exp.company;
+            document.getElementById(`expStart${i}`).value = exp.start;
+            document.getElementById(`expEnd${i}`).value = exp.end;
+            document.getElementById(`expDesc${i}`).value = exp.description;
+        });
+
+        data.education?.forEach((edu, i) => {
+            document.getElementById(`eduDegree${i}`).value = edu.degree;
+            document.getElementById(`eduSchool${i}`).value = edu.school;
+            document.getElementById(`eduYear${i}`).value = edu.year;
+        });
+
+        data.projects?.forEach((proj, i) => {
+            document.getElementById(`projName${i}`).value = proj.name;
+            document.getElementById(`projTech${i}`).value = proj.technologies;
+            document.getElementById(`projDesc${i}`).value = proj.description;
+        });
+    }
+
+    updatePreview();
+});
+</script>
+
+</body>
+</html>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f3f4f6;
             color: #333;
         }
