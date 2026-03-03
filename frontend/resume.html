@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Builder - AI Internship Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: #1f2937;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .project-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .gold-text {
+            color: #f59e0b;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-right button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .nav-right button:hover {
+            background: #2563eb;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #3b82f6;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .panel-content {
+            padding: 20px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* TEMPLATE SELECTION */
+        .templates {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .template-option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .template-option:hover {
+            border-color: #f59e0b;
+            background: #fffbf0;
+        }
+
+        .template-option.active {
+            border-color: #f59e0b;
+            background: #fffbf0;
+        }
+
+        .template-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .template-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* FORM SECTIONS */
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f59e0b;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-small {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .btn-small:hover {
+            background: #d97706;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        .entry {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid #f59e0b;
+            position: relative;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .entry-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .entry-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .entry-content {
+            display: none;
+        }
+
+        .entry.expanded .entry-content {
+            display: block;
+        }
+
+        .entry-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #3b82f6;
+            text-decoration: underline;
+            font-size: 12px;
+            padding: 0;
+        }
+
+        /* PREVIEW */
+        .preview {
+            background: white;
+            padding: 40px;
+            border: 1px solid #ddd;
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .preview-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 15px;
+        }
+
+        .preview-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .preview-contact {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .preview-section {
+            margin-bottom: 15px;
+        }
+
+        .preview-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .preview-item {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+        }
+
+        .preview-item-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .preview-item-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .preview-item-content {
+            font-size: 12px;
+            color: #555;
+            margin-top: 3px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-tag {
+            background: #e0e7ff;
+            color: #3b82f6;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .preview {
+                height: 500px;
+            }
+        }
+
+        @media print {
+            .navbar, .panel-header, .action-bar {
+                display: none;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                box-shadow: none;
+            }
+
+            .panel-content {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="project-title"><span class="gold-text">AI</span> Resume Builder</div>
+    <div class="nav-right">
+        <button onclick="goToDashboard()">← Back</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- LEFT PANEL: FORM -->
+    <div class="panel">
+        <div class="panel-header">📝 Resume Information</div>
+        <div class="panel-content">
+
+            <!-- TEMPLATES -->
+            <div class="form-section">
+                <div class="section-title">Choose Template</div>
+                <div class="templates">
+                    <div class="template-option active" onclick="selectTemplate('modern')">
+                        <div class="template-icon">📄</div>
+                        <div class="template-name">Modern</div>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate('minimal')">
+                        <div class="template-icon">✨</div>
+                        <div class="template-name">Minimal</div>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate('professional')">
+                        <div class="template-icon">💼</div>
+                        <div class="template-name">Professional</div>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate('creative')">
+                        <div class="template-icon">🎨</div>
+                        <div class="template-name">Creative</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TITLE & PROFILE -->
+            <div class="form-section">
+                <div class="section-title">👤 Title & Profile</div>
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="fullName" placeholder="John Doe" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Professional Title</label>
+                    <input type="text" id="jobTitle" placeholder="e.g., Full Stack Developer" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="john@example.com" oninput="updatePreview()">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="phone" placeholder="+1 (555) 000-0000" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="location" placeholder="City, State" oninput="updatePreview()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Professional Summary</label>
+                    <textarea id="summary" placeholder="Brief overview of your professional background and goals..." oninput="updatePreview()"></textarea>
+                </div>
+            </div>
+
+            <!-- SKILLS -->
+            <div class="form-section">
+                <div class="section-title">⚡ Skills</div>
+                <div class="form-group">
+                    <label>Add Skills (comma-separated)</label>
+                    <textarea id="skills" placeholder="Java, Python, JavaScript, React, MongoDB, MySQL, Git..." oninput="updatePreview()"></textarea>
+                </div>
+            </div>
+
+            <!-- EDUCATION -->
+            <div class="form-section">
+                <div class="section-title">🎓 Education</div>
+                <button class="btn-small" onclick="addEducation()">+ Add Education</button>
+                <div id="educationList"></div>
+            </div>
+
+            <!-- QUALIFICATION -->
+            <div class="form-section">
+                <div class="section-title">🏆 Certifications & Qualifications</div>
+                <button class="btn-small" onclick="addCertification()">+ Add Certification</button>
+                <div id="certificationList"></div>
+            </div>
+
+            <!-- PROJECTS -->
+            <div class="form-section">
+                <div class="section-title">🚀 Projects</div>
+                <button class="btn-small" onclick="addProject()">+ Add Project</button>
+                <div id="projectList"></div>
+            </div>
+
+            <!-- EXPERIENCE -->
+            <div class="form-section">
+                <div class="section-title">💼 Experience</div>
+                <button class="btn-small" onclick="addExperience()">+ Add Experience</button>
+                <div id="experienceList"></div>
+            </div>
+
+        </div>
+        <div class="action-bar">
+            <button class="btn-primary btn-secondary" onclick="goToDashboard()">Cancel</button>
+            <button class="btn-primary btn-success" onclick="saveResume()">💾 Save</button>
+            <button class="btn-primary" onclick="printResume()">🖨️ Print/PDF</button>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: PREVIEW -->
+    <div class="panel">
+        <div class="panel-header">👁️ Preview</div>
+        <div class="preview" id="preview">
+            <div class="preview-header">
+                <div class="preview-name">Your Name</div>
+                <div class="preview-contact">Professional Title • City, State • Email • Phone</div>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 8px;">Professional Summary goes here...</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const userEmail = localStorage.getItem("userEmail");
+if (!userEmail) window.location.href = "user_login.html";
+
+let currentTemplate = 'modern';
+let educationCount = 0;
+let certificationCount = 0;
+let projectCount = 0;
+let experienceCount = 0;
+
+function selectTemplate(template) {
+    currentTemplate = template;
+    document.querySelectorAll('.template-option').forEach(el => el.classList.remove('active'));
+    event.target.closest('.template-option').classList.add('active');
+    updatePreview();
+}
+
+function goToDashboard() {
+    if (confirm("Are you sure? Your changes will be lost if not saved.")) {
+        window.location.href = "dashboard.html";
+    }
+}
+
+function logout() {
+    localStorage.removeItem("userEmail");
+    window.location.href = "user_login.html";
+}
+
+function addEducation() {
+    const id = educationCount++;
+    const html = `
+        <div class="entry" id="edu-${id}">
+            <div class="entry-header">
+                <div>
+                    <div class="entry-title"><input type="text" placeholder="School Name" id="eduSchool${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px;"></div>
+                    <div class="entry-subtitle"><input type="text" placeholder="Degree" id="eduDegree${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; margin-top: 4px;"></div>
+                </div>
+                <button class="btn-remove" onclick="removeEntry('edu-${id}')">Remove</button>
+            </div>
+            <div class="entry-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Field of Study</label>
+                        <input type="text" id="eduField${id}" placeholder="e.g., Computer Science" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Graduation Year</label>
+                        <input type="number" id="eduYear${id}" placeholder="2024" oninput="updatePreview()">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById("educationList").insertAdjacentHTML('beforeend', html);
+}
+
+function addCertification() {
+    const id = certificationCount++;
+    const html = `
+        <div class="entry" id="cert-${id}">
+            <div class="entry-header">
+                <div>
+                    <div class="entry-title"><input type="text" placeholder="Certificate Name" id="certName${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px;"></div>
+                    <div class="entry-subtitle"><input type="text" placeholder="Issuing Organization" id="certOrg${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; margin-top: 4px;"></div>
+                </div>
+                <button class="btn-remove" onclick="removeEntry('cert-${id}')">Remove</button>
+            </div>
+            <div class="entry-content">
+                <div class="form-group">
+                    <label style="font-size: 12px;">Issue Date</label>
+                    <input type="month" id="certDate${id}" oninput="updatePreview()">
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById("certificationList").insertAdjacentHTML('beforeend', html);
+}
+
+function addProject() {
+    const id = projectCount++;
+    const html = `
+        <div class="entry" id="proj-${id}">
+            <div class="entry-header">
+                <div>
+                    <div class="entry-title"><input type="text" placeholder="Project Name" id="projName${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px;"></div>
+                    <div class="entry-subtitle"><input type="text" placeholder="Technologies" id="projTech${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; margin-top: 4px;"></div>
+                </div>
+                <button class="btn-remove" onclick="removeEntry('proj-${id}')">Remove</button>
+            </div>
+            <div class="entry-content">
+                <div class="form-group">
+                    <label style="font-size: 12px;">Description</label>
+                    <textarea id="projDesc${id}" placeholder="What did you build? What was your role?" oninput="updatePreview()" style="height: 60px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px;">Project Link</label>
+                    <input type="url" id="projLink${id}" placeholder="https://github.com/..." oninput="updatePreview()">
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById("projectList").insertAdjacentHTML('beforeend', html);
+}
+
+function addExperience() {
+    const id = experienceCount++;
+    const html = `
+        <div class="entry" id="exp-${id}">
+            <div class="entry-header">
+                <div>
+                    <div class="entry-title"><input type="text" placeholder="Job Title" id="expTitle${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px;"></div>
+                    <div class="entry-subtitle"><input type="text" placeholder="Company Name" id="expCompany${id}" oninput="updatePreview()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 3px; margin-top: 4px;"></div>
+                </div>
+                <button class="btn-remove" onclick="removeEntry('exp-${id}')">Remove</button>
+            </div>
+            <div class="entry-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Start Date</label>
+                        <input type="month" id="expStart${id}" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">End Date</label>
+                        <input type="month" id="expEnd${id}" oninput="updatePreview()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 12px;">Description</label>
+                    <textarea id="expDesc${id}" placeholder="Describe your responsibilities and achievements..." oninput="updatePreview()" style="height: 60px;"></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById("experienceList").insertAdjacentHTML('beforeend', html);
+}
+
+function removeEntry(id) {
+    document.getElementById(id).remove();
+    updatePreview();
+}
+
+function updatePreview() {
+    const fullName = document.getElementById("fullName").value || "Your Name";
+    const jobTitle = document.getElementById("jobTitle").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const location = document.getElementById("location").value;
+    const summary = document.getElementById("summary").value;
+    const skills = document.getElementById("skills").value;
+
+    let contact = [];
+    if (jobTitle) contact.push(jobTitle);
+    if (location) contact.push(location);
+    if (email) contact.push(email);
+    if (phone) contact.push(phone);
+
+    let html = `
+        <div class="preview-header">
+            <div class="preview-name">${fullName}</div>
+            <div class="preview-contact">${contact.join(" • ")}</div>
+            ${summary ? `<div style="font-size: 12px; color: #555; margin-top: 8px;">${summary}</div>` : ''}
+        </div>
+    `;
+
+    // Skills
+    if (skills) {
+        const skillsList = skills.split(',').map(s => s.trim()).filter(s => s);
+        html += `
+            <div class="preview-section">
+                <div class="preview-section-title">⚡ Skills</div>
+                <div class="skills-list">
+                    ${skillsList.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Experience
+    let hasExp = false;
+    let expHtml = '<div class="preview-section"><div class="preview-section-title">💼 Experience</div>';
+    for (let i = 0; i < experienceCount; i++) {
+        const title = document.getElementById(`expTitle${i}`)?.value;
+        const company = document.getElementById(`expCompany${i}`)?.value;
+        const start = document.getElementById(`expStart${i}`)?.value;
+        const end = document.getElementById(`expEnd${i}`)?.value;
+        const desc = document.getElementById(`expDesc${i}`)?.value;
+        
+        if (title || company) {
+            hasExp = true;
+            expHtml += `
+                <div class="preview-item">
+                    <div class="preview-item-title">${title}</div>
+                    <div class="preview-item-subtitle">${company} ${start ? '• ' + start : ''} ${end ? 'to ' + end : ''}</div>
+                    ${desc ? `<div class="preview-item-content">${desc}</div>` : ''}
+                </div>
+            `;
+        }
+    }
+    expHtml += '</div>';
+    if (hasExp) html += expHtml;
+
+    // Education
+    let hasEdu = false;
+    let eduHtml = '<div class="preview-section"><div class="preview-section-title">🎓 Education</div>';
+    for (let i = 0; i < educationCount; i++) {
+        const school = document.getElementById(`eduSchool${i}`)?.value;
+        const degree = document.getElementById(`eduDegree${i}`)?.value;
+        const field = document.getElementById(`eduField${i}`)?.value;
+        const year = document.getElementById(`eduYear${i}`)?.value;
+        
+        if (school || degree) {
+            hasEdu = true;
+            eduHtml += `
+                <div class="preview-item">
+                    <div class="preview-item-title">${degree}</div>
+                    <div class="preview-item-subtitle">${school} ${year ? '(' + year + ')' : ''}</div>
+                    ${field ? `<div class="preview-item-content">${field}</div>` : ''}
+                </div>
+            `;
+        }
+    }
+    eduHtml += '</div>';
+    if (hasEdu) html += eduHtml;
+
+    // Certifications
+    let hasCert = false;
+    let certHtml = '<div class="preview-section"><div class="preview-section-title">🏆 Certifications</div>';
+    for (let i = 0; i < certificationCount; i++) {
+        const name = document.getElementById(`certName${i}`)?.value;
+        const org = document.getElementById(`certOrg${i}`)?.value;
+        
+        if (name) {
+            hasCert = true;
+            certHtml += `
+                <div class="preview-item">
+                    <div class="preview-item-title">${name}</div>
+                    ${org ? `<div class="preview-item-subtitle">${org}</div>` : ''}
+                </div>
+            `;
+        }
+    }
+    certHtml += '</div>';
+    if (hasCert) html += certHtml;
+
+    // Projects
+    let hasProj = false;
+    let projHtml = '<div class="preview-section"><div class="preview-section-title">🚀 Projects</div>';
+    for (let i = 0; i < projectCount; i++) {
+        const name = document.getElementById(`projName${i}`)?.value;
+        const tech = document.getElementById(`projTech${i}`)?.value;
+        const desc = document.getElementById(`projDesc${i}`)?.value;
+        const link = document.getElementById(`projLink${i}`)?.value;
+        
+        if (name) {
+            hasProj = true;
+            projHtml += `
+                <div class="preview-item">
+                    <div class="preview-item-title">${name}</div>
+                    ${tech ? `<div class="preview-item-subtitle">${tech}</div>` : ''}
+                    ${desc ? `<div class="preview-item-content">${desc}</div>` : ''}
+                    ${link ? `<div class="preview-item-content"><a href="${link}" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 11px;">View Project →</a></div>` : ''}
+                </div>
+            `;
+        }
+    }
+    projHtml += '</div>';
+    if (hasProj) html += projHtml;
+
+    document.getElementById("preview").innerHTML = html;
+}
+
+function saveResume() {
+    const resumeData = {
+        fullName: document.getElementById("fullName").value,
+        jobTitle: document.getElementById("jobTitle").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        location: document.getElementById("location").value,
+        summary: document.getElementById("summary").value,
+        skills: document.getElementById("skills").value,
+        template: currentTemplate,
+        experience: [],
+        education: [],
+        certifications: [],
+        projects: []
+    };
+
+    // Collect all data
+    for (let i = 0; i < experienceCount; i++) {
+        const title = document.getElementById(`expTitle${i}`)?.value;
+        if (title) {
+            resumeData.experience.push({
+                title,
+                company: document.getElementById(`expCompany${i}`)?.value || '',
+                start: document.getElementById(`expStart${i}`)?.value || '',
+                end: document.getElementById(`expEnd${i}`)?.value || '',
+                description: document.getElementById(`expDesc${i}`)?.value || ''
+            });
+        }
+    }
+
+    for (let i = 0; i < educationCount; i++) {
+        const school = document.getElementById(`eduSchool${i}`)?.value;
+        if (school) {
+            resumeData.education.push({
+                school,
+                degree: document.getElementById(`eduDegree${i}`)?.value || '',
+                field: document.getElementById(`eduField${i}`)?.value || '',
+                year: document.getElementById(`eduYear${i}`)?.value || ''
+            });
+        }
+    }
+
+    for (let i = 0; i < certificationCount; i++) {
+        const name = document.getElementById(`certName${i}`)?.value;
+        if (name) {
+            resumeData.certifications.push({
+                name,
+                organization: document.getElementById(`certOrg${i}`)?.value || '',
+                date: document.getElementById(`certDate${i}`)?.value || ''
+            });
+        }
+    }
+
+    for (let i = 0; i < projectCount; i++) {
+        const name = document.getElementById(`projName${i}`)?.value;
+        if (name) {
+            resumeData.projects.push({
+                name,
+                technologies: document.getElementById(`projTech${i}`)?.value || '',
+                description: document.getElementById(`projDesc${i}`)?.value || '',
+                link: document.getElementById(`projLink${i}`)?.value || ''
+            });
+        }
+    }
+
+    localStorage.setItem(userEmail + "_resume", JSON.stringify(resumeData));
+    alert("✅ Resume saved successfully!");
+}
+
+function printResume() {
+    window.print();
+}
+
+// Load resume on page load
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem(userEmail + "_resume");
+    if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById("fullName").value = data.fullName || '';
+        document.getElementById("jobTitle").value = data.jobTitle || '';
+        document.getElementById("email").value = data.email || '';
+        document.getElementById("phone").value = data.phone || '';
+        document.getElementById("location").value = data.location || '';
+        document.getElementById("summary").value = data.summary || '';
+        document.getElementById("skills").value = data.skills || '';
+
+        data.experience?.forEach(exp => {
+            addExperience();
+            let id = experienceCount - 1;
+            document.getElementById(`expTitle${id}`).value = exp.title;
+            document.getElementById(`expCompany${id}`).value = exp.company;
+            document.getElementById(`expStart${id}`).value = exp.start;
+            document.getElementById(`expEnd${id}`).value = exp.end;
+            document.getElementById(`expDesc${id}`).value = exp.description;
+        });
+
+        data.education?.forEach(edu => {
+            addEducation();
+            let id = educationCount - 1;
+            document.getElementById(`eduSchool${id}`).value = edu.school;
+            document.getElementById(`eduDegree${id}`).value = edu.degree;
+            document.getElementById(`eduField${id}`).value = edu.field;
+            document.getElementById(`eduYear${id}`).value = edu.year;
+        });
+
+        data.certifications?.forEach(cert => {
+            addCertification();
+            let id = certificationCount - 1;
+            document.getElementById(`certName${id}`).value = cert.name;
+            document.getElementById(`certOrg${id}`).value = cert.organization;
+            document.getElementById(`certDate${id}`).value = cert.date;
+        });
+
+        data.projects?.forEach(proj => {
+            addProject();
+            let id = projectCount - 1;
+            document.getElementById(`projName${id}`).value = proj.name;
+            document.getElementById(`projTech${id}`).value = proj.technologies;
+            document.getElementById(`projDesc${id}`).value = proj.description;
+            document.getElementById(`projLink${id}`).value = proj.link;
+        });
+    }
+
+    updatePreview();
+});
+</script>
+
+</body>
+</html>

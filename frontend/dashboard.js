@@ -10,6 +10,10 @@ function goProfile() {
     window.location.href = "profile.html";
 }
 
+function buildResume() {
+    window.location.href = "resume.html";
+}
+
 /* FILE TEXT UPDATE */
 
 function updateResumeText() {
