@@ -310,12 +310,13 @@ async function uploadCertificate() {
 function displayVerificationResult(result) {
     const status = result.status || "UNKNOWN";
     const reason = result.reason || "Verification completed";
-    const licenseId = result.licenseId || null;
-    const score = result.verificationScore || null; // For old format compatibility
+    const platform = result.platform || null;
+    const certificateId = result.certificateId || null;
 
     let icon, color, title, statusClass;
-    
-    // New MongoDB certificate format
+    let platformIcon = "📄";
+
+    // Status determination
     if (status === "REAL") {
         icon = "✓";
         color = "#10b981";
@@ -332,7 +333,6 @@ function displayVerificationResult(result) {
         title = "✗ Certificate is FAKE";
         statusClass = "fake";
     } else if (status === "VERIFIED") {
-        // Old format compatibility
         icon = "✓";
         color = "#10b981";
         title = "Certificate Verified";
@@ -344,40 +344,50 @@ function displayVerificationResult(result) {
         statusClass = "unknown";
     }
 
-    // Build details section based on format
-    let detailsHtml = `<strong>Details:</strong><br>${reason}`;
-    if (licenseId) {
-        detailsHtml += `<br><strong>License ID:</strong> ${licenseId}`;
+    // Platform-specific icons
+    if (platform) {
+        if (platform.includes("MongoDB")) platformIcon = "🍃";
+        else if (platform.includes("AWS")) platformIcon = "🔶";
+        else if (platform.includes("Google")) platformIcon = "🔷";
+        else if (platform.includes("Coursera")) platformIcon = "🎓";
+        else if (platform.includes("Udemy")) platformIcon = "📺";
+        else if (platform.includes("LinkedIn")) platformIcon = "🔗";
+    }
+
+    // Build details section
+    let detailsHtml = `<strong>Verification Details:</strong><br>`;
+    detailsHtml += `${reason}`;
+
+    if (platform) {
+        detailsHtml += `<br><br><strong>${platformIcon} Platform:</strong> ${platform}`;
+    }
+
+    if (certificateId) {
+        detailsHtml += `<br><strong>Certificate ID:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${certificateId}</code>`;
     }
 
     const modalHtml = `
         <div class="verification-modal" onclick="closeVerificationModal(event)">
             <div class="verification-content ${statusClass}" onclick="event.stopPropagation()">
-                <div class="verification-header" style="border-color: ${color}">
-                    <span class="verification-icon" style="color: ${color}; font-size: 24px; font-weight: bold;">${icon}</span>
-                    <h3 style="margin: 0; color: ${color};">${title}</h3>
-                    <button class="close-btn" onclick="closeVerificationModal()">×</button>
+                <div class="verification-header" style="border-color: ${color}; display: flex; align-items: center; gap: 12px;">
+                    <span class="verification-icon" style="color: ${color}; font-size: 28px; font-weight: bold;">${icon}</span>
+                    <div>
+                        <h3 style="margin: 0; color: ${color};">${title}</h3>
+                        ${platform ? `<small style="color: #6b7280; font-weight: normal;">${platformIcon} ${platform}</small>` : ''}
+                    </div>
+                    <button class="close-btn" onclick="closeVerificationModal()" style="margin-left: auto;">×</button>
                 </div>
                 <div class="verification-body">
-                    ${score !== null ? `
-                    <div class="verification-score" style="border-color: ${color}">
-                        <span class="score-label">Verification Score</span>
-                        <span class="score-value" style="color: ${color}">${score}/100</span>
-                    </div>
-                    ` : ''}
-                    <div class="verification-message" style="border-left: 4px solid ${color}; padding-left: 12px; margin: 16px 0;">
+                    <div class="verification-message" style="border-left: 4px solid ${color}; padding-left: 12px; margin: 16px 0; background: ${color}15; padding: 12px; border-radius: 4px;">
+                        <strong>Status:</strong> ${status}<br>
                         ${reason}
                     </div>
-                    <div class="verification-details">
+                    <div class="verification-details" style="background: #f9fafb; padding: 12px; border-radius: 4px; line-height: 1.6;">
                         ${detailsHtml}
                     </div>
-                    ${result.filename ? `
-                    <div class="verification-file-info">
-                        <strong>File:</strong> ${result.filename}<br>
-                        ${result.fileSize ? `<strong>Size:</strong> ${(result.fileSize / 1024).toFixed(2)} KB<br>` : ''}
-                        ${result.fileType ? `<strong>Type:</strong> ${result.fileType}` : ''}
-                    </div>
-                    ` : ''}
+                </div>
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 12px; margin-top: 12px; font-size: 12px; color: #6b7280;">
+                    Verification started: ${new Date().toLocaleString()}
                 </div>
             </div>
         </div>

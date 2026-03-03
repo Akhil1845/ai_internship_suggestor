@@ -15,6 +15,7 @@ import com.example.internship_ai_backend.service.InternshipRecommendationService
 import com.example.internship_ai_backend.service.InternshipMatchingService;
 import com.example.internship_ai_backend.service.CertificateVerificationService;
 import com.example.internship_ai_backend.service.MongoDBCertificateVerificationService;
+import com.example.internship_ai_backend.service.UniversalCertificateVerificationService;
 import com.example.internship_ai_backend.service.SocialAnalyticsService;
 import com.example.internship_ai_backend.service.StudentService;
 
@@ -45,6 +46,9 @@ public class StudentController {
 
     @Autowired
     private MongoDBCertificateVerificationService mongoDBCertificateVerificationService;
+
+    @Autowired
+    private UniversalCertificateVerificationService universalCertificateVerificationService;
 
     // ===================== SIGNUP =====================
     @PostMapping("/signup")
@@ -193,9 +197,9 @@ public class StudentController {
         public ResponseEntity<Map<String, Object>> verifyCertificate(
                         @RequestPart("certificate") MultipartFile certificate) {
 
-                // Use MongoDB-specific certificate verification service
+                // Use universal certificate verification service (supports MongoDB, AWS, Google Cloud, Coursera, Udemy, LinkedIn Learning)
                 Map<String, Object> verificationResult =
-                                mongoDBCertificateVerificationService.verifyMongoDBCertificate(certificate);
+                                universalCertificateVerificationService.verifyCertificate(certificate);
 
                 return ResponseEntity.ok(verificationResult);
         }
