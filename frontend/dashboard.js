@@ -11,7 +11,7 @@ function goProfile() {
 }
 
 function buildResume() {
-    window.location.href = "resume.html";
+    window.location.href = "templates.html";
 }
 
 /* FILE TEXT UPDATE */
