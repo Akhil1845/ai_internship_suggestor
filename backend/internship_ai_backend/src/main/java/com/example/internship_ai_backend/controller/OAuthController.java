@@ -9,6 +9,8 @@ import com.example.internship_ai_backend.entity.Student;
 import com.example.internship_ai_backend.service.GoogleOAuthService;
 import com.example.internship_ai_backend.service.StudentService;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -27,11 +29,12 @@ public class OAuthController {
      * This endpoint receives the authorization code from Google
      */
     @GetMapping("/google/callback")
-    public RedirectView handleGoogleCallback(@RequestParam String code, @RequestParam String state) {
+    public RedirectView handleGoogleCallback(@RequestParam String code,
+                                             @RequestParam(required = false) String state) {
         
         try {
-            // Decode the redirect URI from the state parameter
-            String redirectUri = "http://localhost:5500/auth-callback.html";
+            String flowMode = (state == null || state.trim().isEmpty()) ? "login" : state.trim().toLowerCase();
+            String redirectUri = "http://localhost:8089/api/auth/google/callback";
             
             // Exchange code for access token
             String accessToken = googleOAuthService.exchangeCodeForToken(code, redirectUri);
@@ -46,10 +49,22 @@ public class OAuthController {
                 userInfo.get("id")
             );
             
-            // Redirect to frontend with user data
             RedirectView redirectView = new RedirectView();
-            redirectView.setUrl("http://localhost:5500/auth-callback.html?success=true&userId=" + 
-                student.getId() + "&email=" + student.getEmail() + "&name=" + student.getName());
+
+                boolean needsSetup = "signup".equals(flowMode) &&
+                    (student.getUsername() == null || student.getUsername().trim().isEmpty() ||
+                        student.getPassword() == null || student.getPassword().trim().isEmpty());
+
+                String encodedEmail = URLEncoder.encode(student.getEmail(), StandardCharsets.UTF_8);
+                String encodedName = URLEncoder.encode(student.getName() == null ? "" : student.getName(), StandardCharsets.UTF_8);
+
+                if (needsSetup) {
+                redirectView.setUrl("http://localhost:5500/auth-callback.html?setup=true&userId=" +
+                    student.getId() + "&email=" + encodedEmail + "&name=" + encodedName);
+                } else {
+                redirectView.setUrl("http://localhost:5500/auth-callback.html?success=true&userId=" +
+                    student.getId() + "&email=" + encodedEmail + "&name=" + encodedName);
+                }
             
             return redirectView;
             
@@ -58,8 +73,8 @@ public class OAuthController {
             
             // Redirect to frontend with error
             RedirectView redirectView = new RedirectView();
-            redirectView.setUrl("http://localhost:5500/auth-callback.html?success=false&error=" + 
-                e.getMessage());
+            String encodedError = URLEncoder.encode(e.getMessage() == null ? "OAuth failed" : e.getMessage(), StandardCharsets.UTF_8);
+            redirectView.setUrl("http://localhost:5500/auth-callback.html?success=false&error=" + encodedError);
             
             return redirectView;
         }
@@ -84,5 +99,28 @@ public class OAuthController {
                 "&state=" + state;
         
         return ResponseEntity.ok(Map.of("authUrl", authUrl));
+    }
+
+    @PostMapping("/google/complete-signup")
+    public ResponseEntity<?> completeGoogleSignup(@RequestBody Map<String, String> payload) {
+
+        Integer userId;
+        try {
+            userId = Integer.parseInt(payload.get("userId"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid user id!");
+        }
+
+        String result = studentService.completeGoogleSignup(
+                userId,
+                payload.get("username"),
+                payload.get("password")
+        );
+
+        if ("Google signup completed!".equals(result)) {
+            return ResponseEntity.ok(result);
+        }
+
+        return ResponseEntity.badRequest().body(result);
     }
 }

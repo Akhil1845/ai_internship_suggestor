@@ -29,11 +29,12 @@
     return ct.includes('application/json') ? response.json() : response.text();
   }
 
-  function handleSocial(provider) {
+  function handleSocial(provider, flowMode = 'login') {
     if (provider === 'Google') {
       // Redirect to Google OAuth
       const scope = encodeURIComponent('email profile');
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+      const state = encodeURIComponent(flowMode);
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&state=${state}`;
       window.location.href = authUrl;
     } else {
       alert(`${provider} OAuth is not yet implemented.`);

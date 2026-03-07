@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Authentication - internship_ai</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -18,61 +13,118 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #fff;
+      padding: 20px;
     }
-    
     .container {
+      width: 100%;
+      max-width: 460px;
       text-align: center;
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      padding: 28px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
-    
     .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top-color: white;
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.35);
+      border-top-color: #fff;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 14px;
     }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    p { font-size: 14px; opacity: 0.92; }
+    .success { color: #4ade80; }
+    .error { color: #fca5a5; }
+
+    .setup-form {
+      display: none;
+      margin-top: 18px;
+      text-align: left;
     }
-    
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
+    .setup-form.visible { display: block; }
+    .field { margin-bottom: 12px; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      opacity: 0.95;
     }
-    
-    p {
-      font-size: 16px;
-      opacity: 0.9;
+    .field input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.2);
+      color: #fff;
+      border-radius: 10px;
+      padding: 11px 12px;
+      outline: none;
     }
-    
-    .success {
-      color: #4ade80;
+    .field input::placeholder { color: rgba(255, 255, 255, 0.7); }
+    .field-error {
+      min-height: 18px;
+      font-size: 12px;
+      color: #fecaca;
+      margin-top: 4px;
     }
-    
-    .error {
-      color: #f87171;
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #f59e0b;
+      color: #111827;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="spinner" id="spinner"></div>
-    <h1 id="message">Authenticating with Google...</h1>
-    <p id="details">Please wait while we log you in.</p>
+    <div id="status-box">
+      <div class="spinner" id="spinner"></div>
+      <h1 id="message">Authenticating with Google...</h1>
+      <p id="details">Please wait while we process your account.</p>
+    </div>
+
+    <form id="setup-form" class="setup-form" novalidate>
+      <h1>Complete Signup</h1>
+      <p style="margin-top: 4px; margin-bottom: 12px;">Set a username and password for future login.</p>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" type="text" placeholder="username" autocomplete="username">
+        <div class="field-error" id="username-err"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Minimum 8 characters" autocomplete="new-password">
+        <div class="field-error" id="password-err"></div>
+      </div>
+
+      <div class="field">
+        <label for="confirm">Confirm Password</label>
+        <input id="confirm" type="password" placeholder="Repeat password" autocomplete="new-password">
+        <div class="field-error" id="confirm-err"></div>
+      </div>
+
+      <button class="btn" id="setup-btn" type="submit">Save and Continue</button>
+    </form>
   </div>
 
   <script>
-    // Get URL parameters
+    const AUTH_BASE = 'http://localhost:8089/api/auth';
+
     const params = new URLSearchParams(window.location.search);
+    const setup = params.get('setup') === 'true';
     const success = params.get('success');
     const userId = params.get('userId');
     const email = params.get('email');
@@ -82,47 +134,129 @@
     const spinner = document.getElementById('spinner');
     const messageEl = document.getElementById('message');
     const detailsEl = document.getElementById('details');
+    const setupForm = document.getElementById('setup-form');
 
-    if (success === 'true' && userId && email) {
-      // Success - Store user data and redirect
+    function redirectToLogin(delayMs) {
+      setTimeout(() => { window.location.href = '/user_login.html'; }, delayMs);
+    }
+
+    function redirectToDashboard(delayMs) {
+      setTimeout(() => { window.location.href = '/dashboard.html'; }, delayMs);
+    }
+
+    function saveSession() {
+      if (email) localStorage.setItem('userEmail', email);
+      if (userId) localStorage.setItem('studentId', userId);
+      if (name) localStorage.setItem('userName', name);
+    }
+
+    function showSetupForm() {
+      spinner.style.display = 'none';
+      messageEl.textContent = 'Google account verified';
+      detailsEl.textContent = 'Complete your signup details below.';
+      setupForm.classList.add('visible');
+    }
+
+    if (setup && userId && email) {
+      showSetupForm();
+    } else if (success === 'true' && userId && email) {
       spinner.style.display = 'none';
       messageEl.textContent = 'Authentication Successful!';
       messageEl.className = 'success';
-      detailsEl.textContent = `Welcome back, ${name || email}`;
-
-      // Store user data in localStorage
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('studentId', userId);
-      if (name) localStorage.setItem('userName', name);
-
-      // Redirect to dashboard after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/dashboard.html';
-      }, 2000);
-
+      detailsEl.textContent = 'Redirecting to dashboard...';
+      saveSession();
+      redirectToDashboard(1200);
     } else if (success === 'false') {
-      // Error
       spinner.style.display = 'none';
       messageEl.textContent = 'Authentication Failed';
       messageEl.className = 'error';
-      detailsEl.textContent = error || 'Something went wrong. Please try again.';
-
-      // Redirect back to login after 3 seconds
-      setTimeout(() => {
-        window.location.href = '/user_login.html';
-      }, 3000);
-
+      detailsEl.textContent = error || 'Something went wrong. Redirecting to login...';
+      redirectToLogin(2200);
     } else {
-      // Unknown state - redirect to login
       spinner.style.display = 'none';
-      messageEl.textContent = 'Invalid Response';
+      messageEl.textContent = 'Invalid OAuth response';
       messageEl.className = 'error';
       detailsEl.textContent = 'Redirecting to login...';
-
-      setTimeout(() => {
-        window.location.href = '/user_login.html';
-      }, 2000);
+      redirectToLogin(1800);
     }
+
+    setupForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const usernameEl = document.getElementById('username');
+      const passwordEl = document.getElementById('password');
+      const confirmEl = document.getElementById('confirm');
+      const btn = document.getElementById('setup-btn');
+
+      const usernameErr = document.getElementById('username-err');
+      const passwordErr = document.getElementById('password-err');
+      const confirmErr = document.getElementById('confirm-err');
+
+      usernameErr.textContent = '';
+      passwordErr.textContent = '';
+      confirmErr.textContent = '';
+
+      const username = usernameEl.value.trim();
+      const password = passwordEl.value;
+      const confirm = confirmEl.value;
+
+      let valid = true;
+      if (username.length < 3) {
+        usernameErr.textContent = 'Username must be at least 3 characters';
+        valid = false;
+      }
+      if (password.length < 8) {
+        passwordErr.textContent = 'Password must be at least 8 characters';
+        valid = false;
+      }
+      if (confirm !== password) {
+        confirmErr.textContent = 'Passwords do not match';
+        valid = false;
+      }
+      if (!valid) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const response = await fetch(`${AUTH_BASE}/google/complete-signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            username,
+            password
+          })
+        });
+
+        const result = await response.text();
+        if (!response.ok) {
+          if (result.toLowerCase().includes('username')) {
+            usernameErr.textContent = result;
+          } else if (result.toLowerCase().includes('password')) {
+            passwordErr.textContent = result;
+          } else {
+            confirmErr.textContent = result;
+          }
+          return;
+        }
+
+        messageEl.textContent = 'Signup Completed!';
+        messageEl.className = 'success';
+        detailsEl.textContent = 'Your username and password were saved.';
+        setupForm.classList.remove('visible');
+
+        saveSession();
+        localStorage.setItem('userName', username);
+
+        redirectToDashboard(1200);
+      } catch {
+        confirmErr.textContent = 'Could not connect to server. Try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save and Continue';
+      }
+    });
   </script>
 </body>
 </html>

@@ -32,6 +32,9 @@ public class StudentService {
             if (student.getPassword() == null) {
                 return "Password is required!";
             }
+            if (student.getUsername() == null || student.getUsername().trim().isEmpty()) {
+                return "Username is required!";
+            }
             student.setAuthProvider("local");
         }
 
@@ -43,7 +46,7 @@ public class StudentService {
 
         // Check username uniqueness
         if (student.getUsername() != null && !student.getUsername().trim().isEmpty()) {
-            String username = student.getUsername().trim();
+            String username = student.getUsername().trim().toLowerCase();
             if (studentRepository.existsByUsername(username)) {
                 return "Username already exists!";
             }
@@ -78,10 +81,8 @@ public class StudentService {
         if (optionalStudent.isPresent()) {
             Student student = optionalStudent.get();
 
-            // Only allow password login for local auth
-            if ("local".equals(student.getAuthProvider()) && 
-                student.getPassword() != null && 
-                student.getPassword().equals(password)) {
+            // Allow password login for any user who has a stored password.
+            if (student.getPassword() != null && student.getPassword().equals(password)) {
                 return Optional.of(student);
             }
         }
@@ -103,7 +104,9 @@ public class StudentService {
         if (existingByEmail.isPresent()) {
             Student student = existingByEmail.get();
             student.setGoogleId(googleId);
-            student.setAuthProvider("google");
+            if (student.getAuthProvider() == null || student.getAuthProvider().trim().isEmpty()) {
+                student.setAuthProvider("google");
+            }
             return studentRepository.save(student);
         }
 
@@ -116,6 +119,45 @@ public class StudentService {
         // No password needed for OAuth users
         
         return studentRepository.save(newStudent);
+    }
+
+    // ===================== COMPLETE GOOGLE SIGNUP =====================
+    public String completeGoogleSignup(Integer studentId, String username, String password) {
+
+        if (studentId == null) {
+            return "Invalid user id!";
+        }
+        if (username == null || username.trim().isEmpty()) {
+            return "Username is required!";
+        }
+        if (password == null || password.trim().isEmpty()) {
+            return "Password is required!";
+        }
+        if (password.length() < 8) {
+            return "Password must be at least 8 characters";
+        }
+
+        Optional<Student> optionalStudent = studentRepository.findById(studentId);
+        if (optionalStudent.isEmpty()) {
+            return "User not found!";
+        }
+
+        Student student = optionalStudent.get();
+        String normalizedUsername = username.trim().toLowerCase();
+
+        Optional<Student> existingByUsername = studentRepository.findByUsername(normalizedUsername);
+        if (existingByUsername.isPresent() && !existingByUsername.get().getId().equals(studentId)) {
+            return "Username already exists!";
+        }
+
+        student.setUsername(normalizedUsername);
+        student.setPassword(password);
+        if (student.getAuthProvider() == null || student.getAuthProvider().trim().isEmpty()) {
+            student.setAuthProvider("google");
+        }
+
+        studentRepository.save(student);
+        return "Google signup completed!";
     }
 
     // ===================== GET PROFILE =====================
