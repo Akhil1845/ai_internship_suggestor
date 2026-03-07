@@ -1,344 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fishroot - Login & Signup</title>
-    <style>
-        :root {
-            --primary-orange: #ff8c05;
-            --primary-yellow: #ffbb33;
-            --text-dark: #1e293b;
-            --text-gray: #64748b;
-            --bg-blue: #f0f9ff;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #d1d5db;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .main-card {
-            display: flex;
-            width: 1200px;
-            height: 700px;
-            background: white;
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-
-        /* LEFT SIDE: FORM */
-        .form-container {
-            flex: 1;
-            background-color: var(--bg-blue);
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        /* Cloud-like background effect */
-        .form-container::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 20% 30%, white 0%, transparent 20%),
-                        radial-gradient(circle at 80% 70%, white 0%, transparent 25%);
-            opacity: 0.6;
-        }
-
-        .inner-form {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 340px;
-            text-align: center;
-        }
-
-        .logo-img {
-            width: 60px;
-            margin-bottom: 20px;
-        }
-
-        h2 { color: var(--text-dark); font-size: 26px; margin-bottom: 10px; }
-        .desc { color: var(--text-gray); font-size: 13px; margin-bottom: 30px; line-height: 1.5; }
-
-        .input-box { text-align: left; margin-bottom: 15px; }
-        .input-box label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: var(--text-dark); }
-        .input-box input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        .pass-group { position: relative; }
-        .eye-icon { position: absolute; right: 12px; top: 12px; cursor: pointer; opacity: 0.5; }
-
-        .btn-grad {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--primary-orange), var(--primary-yellow));
-            color: white;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        .btn-grad:hover { transform: scale(1.02); }
-
-        .legal { font-size: 11px; color: var(--text-gray); margin: 20px 0; }
-        .legal a { color: var(--text-dark); font-weight: 700; text-decoration: none; }
-
-        .sep { display: flex; align-items: center; color: #cbd5e1; font-size: 12px; margin-bottom: 20px; }
-        .sep::before, .sep::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin: 0 10px; }
-
-        .social-grid { display: flex; gap: 10px; }
-        .social-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .toggle-area { margin-top: 25px; font-size: 14px; color: var(--text-gray); }
-        .toggle-link { color: var(--primary-orange); font-weight: 700; cursor: pointer; }
-
-        /* RIGHT SIDE: IMAGE */
-        .image-container {
-            flex: 1.2;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            position: relative;
-            transition: background-image 0.8s ease-in-out;
-        }
-
-        /* Dark overlay for text readability */
-        .image-container::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(transparent 60%, rgba(0,0,0,0.8));
-        }
-
-        .promo-content { position: relative; z-index: 5; color: white; }
-        .promo-content h3 { font-size: 28px; margin-bottom: 10px; }
-        .promo-content p { font-size: 14px; opacity: 0.8; line-height: 1.6; }
-
-        @media (max-width: 900px) {
-            .image-container { display: none; }
-            .main-card { width: 450px; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>internship_ai – Student Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="user_login.css">
 </head>
 <body>
 
-    <div class="main-card">
-        <div class="form-container">
-            <div class="inner-form">
-                <img src="https://img.icons8.com/ios-filled/100/1e293b/fish.png" class="logo-img" alt="logo">
-                <h2 id="title">Welcome Back!</h2>
-                <p class="desc" id="subtitle">Log in to continue your journey.</p>
+<!-- Background -->
+<div class="bg">
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+</div>
 
-                <form>
-                    <div class="input-box" id="user-box" style="display: none;">
-                        <label>Username</label>
-                        <input type="text" placeholder="Input Username">
-                    </div>
-                    <div class="input-box">
-                        <label>Email</label>
-                        <input type="email" placeholder="Input email">
-                    </div>
-                    <div class="input-box">
-                        <label>Password</label>
-                        <div class="pass-group">
-                            <input type="password" placeholder="Input your password" id="password-input">
-                            <span class="eye-icon" id="eye-icon" onclick="togglePassword()">👁️</span>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-grad" id="btn-text">Login</button>
-                </form>
+<div class="page">
 
-                <p class="legal">
-                    By continuing, you agree to Mancing <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-                </p>
+  <!-- CARD -->
+  <div class="card-wrap">
+    <div class="card">
 
-                <div class="sep">or continue with</div>
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <rect x="2" y="7" width="16" height="11" rx="2.5" fill="rgba(12,14,18,0.9)"/>
+            <path d="M7 7V5.5C7 4.4 7.9 3.5 9 3.5h2C12.1 3.5 13 4.4 13 5.5V7" stroke="rgba(12,14,18,0.8)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="2" y1="12" x2="18" y2="12" stroke="rgba(12,14,18,0.6)" stroke-width="1.2"/>
+            <circle cx="10" cy="12" r="1.5" fill="rgba(12,14,18,0.7)"/>
+          </svg>
+        </div>
+        <span class="brand-wordmark">internship<span>_ai</span></span>
+      </div>
 
-                <div class="social-grid">
-                    <button class="social-btn"><img src="https://img.icons8.com/color/20/000000/google-logo.png"> Google</button>
-                    <button class="social-btn"><img src="https://img.icons8.com/ios-filled/20/000000/mac-os.png"> Apple</button>
-                </div>
+      <!-- TAB BAR -->
+      <div class="tab-bar" id="tab-bar">
+        <div class="tab-slider" id="tab-slider"></div>
+        <button class="tab-btn active" id="tab-login" onclick="switchPanel('login')">Sign In</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchPanel('signup')">Sign Up</button>
+      </div>
 
-                <div class="toggle-area">
-                    <span id="footer-text">Don't have an account?</span> 
-                    <span class="toggle-link" onclick="toggleForm()">Sign Up</span>
-                </div>
+      <div class="panels">
+
+        <!-- LOGIN PANEL -->
+        <div class="panel" id="panel-login">
+
+          <div class="form-header">
+            <div class="form-title">Welcome back</div>
+            <div class="form-sub">Your next opportunity is waiting.</div>
+          </div>
+
+          <!-- Social -->
+          <div class="social-row">
+            <button class="btn-social" onclick="handleSocial('Google')">
+              <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26 9.77A7.11 7.11 0 0 1 12 4.89c1.92 0 3.64.72 4.96 1.9L20.6 3.16A11.91 11.91 0 0 0 12 0C7.37 0 3.35 2.79 1.39 6.84l3.87 2.93Z"/><path fill="#FBBC05" d="M16.04 18.01A7.08 7.08 0 0 1 12 19.11c-3.09 0-5.73-1.96-6.74-4.72l-3.87 2.92C3.35 21.21 7.37 24 12 24c2.93 0 5.72-1.05 7.83-2.96l-3.79-3.03Z"/><path fill="#4285F4" d="M23.76 12.27c0-.86-.08-1.69-.23-2.49H12v4.99h6.61a5.54 5.54 0 0 1-2.57 3.75l3.79 3.03C21.97 19.55 23.76 16.18 23.76 12.27Z"/><path fill="#34A853" d="M5.26 14.39A7.17 7.17 0 0 1 4.89 12c0-.84.15-1.65.37-2.23L1.39 6.84A11.94 11.94 0 0 0 0 12c0 1.81.4 3.53 1.39 5.16l3.87-2.77Z"/></svg>
+              Continue with Google
+            </button>
+          </div>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <span>or</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <form id="form-login" novalidate autocomplete="off">
+
+            <div class="field">
+              <label for="login-email">
+                Email address
+                <button type="button" class="lbl-link" onclick="handleForgotPassword()">Forgot password?</button>
+              </label>
+              <div class="input-wrap">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" id="login-email" placeholder="you@university.edu" autocomplete="email"/>
+              </div>
+              <div class="field-error" id="login-email-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
             </div>
+
+            <div class="field">
+              <label for="login-password">Password</label>
+              <div class="input-wrap has-toggle">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+                <button type="button" class="toggle-pw" data-target="login-password" aria-label="Toggle visibility">
+                  <svg class="icon-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="icon-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+              <div class="field-error" id="login-password-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btn-login" disabled>
+              <div class="spinner"></div>
+              <span class="btn-text">Sign in →</span>
+            </button>
+
+          </form>
+
+          <div class="footer-note" style="margin-top:16px">
+            New here?
+            <button class="link-btn" onclick="switchPanel('signup')">Create your account</button>
+          </div>
+
         </div>
 
-        <div class="image-container">
-            <div class="promo-content">
-                <h3>Catch Your Biggest Opportunities</h3>
-                <p>Unlock smarter opportunities with AI-driven recommendations.Let technology match your skills with the internships that truly fit you.</p>
+        <!-- SIGNUP PANEL -->
+        <div class="panel hidden" id="panel-signup">
+
+          <div class="form-header">
+            <div class="form-title">Create account</div>
+            <div class="form-sub">Join 12,000+ students landing better internships.</div>
+          </div>
+
+          <!-- Social -->
+          <div class="social-row">
+            <button class="btn-social" onclick="handleSocial('Google')">
+              <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.26 9.77A7.11 7.11 0 0 1 12 4.89c1.92 0 3.64.72 4.96 1.9L20.6 3.16A11.91 11.91 0 0 0 12 0C7.37 0 3.35 2.79 1.39 6.84l3.87 2.93Z"/><path fill="#FBBC05" d="M16.04 18.01A7.08 7.08 0 0 1 12 19.11c-3.09 0-5.73-1.96-6.74-4.72l-3.87 2.92C3.35 21.21 7.37 24 12 24c2.93 0 5.72-1.05 7.83-2.96l-3.79-3.03Z"/><path fill="#4285F4" d="M23.76 12.27c0-.86-.08-1.69-.23-2.49H12v4.99h6.61a5.54 5.54 0 0 1-2.57 3.75l3.79 3.03C21.97 19.55 23.76 16.18 23.76 12.27Z"/><path fill="#34A853" d="M5.26 14.39A7.17 7.17 0 0 1 4.89 12c0-.84.15-1.65.37-2.23L1.39 6.84A11.94 11.94 0 0 0 0 12c0 1.81.4 3.53 1.39 5.16l3.87-2.77Z"/></svg>
+              Google
+            </button>
+          </div>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <span>or</span>
+            <div class="divider-line"></div>
+          </div>
+
+          <form id="form-signup" novalidate autocomplete="off">
+
+            <div class="field">
+              <label for="signup-name">Full name</label>
+              <div class="input-wrap">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="signup-name" placeholder="Jane Smith" autocomplete="name"/>
+              </div>
+              <div class="field-error" id="signup-name-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
             </div>
+
+            <div class="field">
+              <label for="signup-email">Email address</label>
+              <div class="input-wrap">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" id="signup-email" placeholder="you@university.edu" autocomplete="email"/>
+              </div>
+              <div class="field-error" id="signup-email-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="signup-password">Password</label>
+              <div class="input-wrap has-toggle">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password"/>
+                <button type="button" class="toggle-pw" data-target="signup-password" aria-label="Toggle visibility">
+                  <svg class="icon-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="icon-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+              <div class="strength-bar" id="strength-bar">
+                <div class="strength-segments">
+                  <div class="strength-seg" id="seg-1"></div>
+                  <div class="strength-seg" id="seg-2"></div>
+                  <div class="strength-seg" id="seg-3"></div>
+                  <div class="strength-seg" id="seg-4"></div>
+                </div>
+                <div class="strength-label" id="strength-label"></div>
+              </div>
+              <div class="field-error" id="signup-password-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="signup-confirm">Confirm password</label>
+              <div class="input-wrap has-toggle">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <input type="password" id="signup-confirm" placeholder="Repeat your password" autocomplete="new-password"/>
+                <button type="button" class="toggle-pw" data-target="signup-confirm" aria-label="Toggle visibility">
+                  <svg class="icon-eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="icon-eye-off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+              <div class="field-error" id="signup-confirm-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btn-signup" disabled>
+              <div class="spinner"></div>
+              <span class="btn-text">Create account →</span>
+            </button>
+
+          </form>
+
+          <div class="terms-note">
+            By creating an account you agree to our
+            <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+          </div>
+
+          <div class="footer-note">
+            Already a member?
+            <button class="link-btn" onclick="switchPanel('login')">Sign in</button>
+          </div>
+
         </div>
+
+      </div>
     </div>
+  </div>
 
-    <script>
-let isSignUp = false;
-let currentImageIndex = 0;
-const images = ['pic1.png', 'pic2.png'];
+</div>
 
-const btn = document.getElementById('btn-text');
+<script src="user_login.js"></script>
 
-function togglePassword() {
-    const passwordInput = document.getElementById('password-input');
-    const eyeIcon = document.getElementById('eye-icon');
-
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.textContent = '👁️‍🗨️';
-    } else {
-        passwordInput.type = 'password';
-        eyeIcon.textContent = '👁️';
-    }
-}
-
-function toggleForm() {
-    isSignUp = !isSignUp;
-    const title = document.getElementById('title');
-    const subtitle = document.getElementById('subtitle');
-    const userBox = document.getElementById('user-box');
-    const footerText = document.getElementById('footer-text');
-    const link = document.querySelector('.toggle-link');
-
-    if (!isSignUp) {
-        title.innerText = "Welcome Back!";
-        subtitle.innerText = "Log in to continue your journey.";
-        userBox.style.display = "none";
-        btn.innerText = "Login";
-        footerText.innerText = "Don't have an account?";
-        link.innerText = "Sign Up";
-    } else {
-        title.innerText = "Let's Catch Big Dreams!";
-        subtitle.innerText = "Create your account to start your AI journey.";
-        userBox.style.display = "block";
-        btn.innerText = "Sign Up";
-        footerText.innerText = "Already have an account?";
-        link.innerText = "Login";
-    }
-}
-
-btn.addEventListener("click", async function () {
-    const username = document.querySelector("#user-box input")?.value;
-    const email = document.querySelector("input[type='email']").value;
-    const password = document.getElementById("password-input").value;
-
-    if (!email || !password || (isSignUp && !username)) {
-        alert("Please fill all required fields");
-        return;
-    }
-
-    if (isSignUp) {
-        // SIGNUP API CALL
-        try {
-            const response = await fetch("http://localhost:8089/api/students/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: username,
-                    email: email,
-                    password: password,
-                    studentClass: "BTech",
-                    skills: "",
-                    preferredDomain: ""
-                })
-            });
-
-            const result = await response.text();
-            alert(result);
-
-            if (result.includes("successful")) {
-                toggleForm();
-            }
-
-        } catch (error) {
-            alert("Error connecting to server");
-        }
-
-    } else {
-        // LOGIN API CALL
-        try {
-            const response = await fetch("http://localhost:8089/api/students/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            });
-
-            if (response.ok) {
-                // Backend returns user object on successful login
-                const userData = await response.json();
-                
-                if (userData && userData.email) {
-                    // Login successful - user data received
-                    localStorage.setItem("userEmail", userData.email);
-                    window.location.href = "dashboard.html";
-                } else {
-                    alert("Invalid email or password");
-                }
-            } else {
-                alert("Invalid email or password");
-            }
-
-        } catch (error) {
-            console.error("Login error:", error);
-            alert("Error connecting to server");
-        }
-    }
-});
-
-function cycleImages() {
-    const imageContainer = document.querySelector('.image-container');
-    imageContainer.style.backgroundImage = `url('${images[currentImageIndex]}')`;
-    currentImageIndex = (currentImageIndex + 1) % images.length;
-}
-
-cycleImages();
-setInterval(cycleImages, 5000);
-</script>
 </body>
 </html>

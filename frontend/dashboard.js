@@ -279,30 +279,51 @@ async function uploadCertificate() {
         return;
     }
 
+    if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+        alert('Only PDF files are accepted.');
+        return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+        alert('File exceeds 10 MB limit.');
+        return;
+    }
+
     if (uploadButton) {
         uploadButton.disabled = true;
         uploadButton.innerText = "Verifying...";
     }
 
+    // Show the certificate results section
+    const resultsSection = document.getElementById("certificateResultsSection");
+    if (resultsSection) {
+        resultsSection.classList.remove("show");
+    }
+
     try {
         const formData = new FormData();
-        formData.append("certificate", file);
+        formData.append("file", file);
 
-        const response = await fetch("http://localhost:8089/api/students/certificate/verify", {
+        const response = await fetch("http://localhost:8089/api/verify/certificate", {
             method: "POST",
             body: formData
         });
 
-        const result = await response.json();
-
         if (!response.ok) {
-            throw new Error("Verification failed");
+            throw new Error(`Server error: ${response.status}`);
         }
 
-        displayVerificationResult(result);
+        const data = await response.json();
+        renderCertificateResult(data);
+        
+        // Show and scroll to results
+        if (resultsSection) {
+            resultsSection.classList.add("show");
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     } catch (error) {
         console.error("Certificate verification error:", error);
-        alert("Failed to verify certificate. Please try again.");
+        alert("Could not reach the backend. Is Spring Boot running on port 8089?");
     } finally {
         if (uploadButton) {
             uploadButton.disabled = false;
@@ -311,103 +332,90 @@ async function uploadCertificate() {
     }
 }
 
-function displayVerificationResult(result) {
-    const status = result.status || "UNKNOWN";
-    const reason = result.reason || "Verification completed";
-    const platform = result.platform || null;
-    const certificateId = result.certificateId || null;
+function renderCertificateResult(d) {
+    // Verdict banner
+    const banner = document.getElementById('verdictBanner');
+    banner.className = 'verdict-banner ' + (d.authentic ? 'authentic' : 'fake');
+    document.getElementById('verdictIcon').textContent = d.authentic ? '🛡️' : '⚠️';
+    document.getElementById('verdictTitle').textContent = d.verdict || (d.authentic ? 'Authentic Certificate' : 'Unverified Certificate');
+    document.getElementById('verdictExpl').textContent = d.explanation || '';
 
-    let icon, color, title, statusClass;
-    let platformIcon = "📄";
+    // Confidence
+    const score = d.confidenceScore ?? 0;
+    document.getElementById('confVal').textContent = `${score}/100`;
+    const fill = document.getElementById('confFill');
+    fill.className = 'confidence-fill ' + (score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low');
+    setTimeout(() => fill.style.width = score + '%', 100);
 
-    // Status determination
-    if (status === "REAL") {
-        icon = "✓";
-        color = "#10b981";
-        title = "✓ Certificate is REAL";
-        statusClass = "verified";
-    } else if (status === "SUSPICIOUS") {
-        icon = "⚠";
-        color = "#f59e0b";
-        title = "⚠ Certificate is SUSPICIOUS";
-        statusClass = "suspicious";
-    } else if (status === "FAKE") {
-        icon = "✗";
-        color = "#ef4444";
-        title = "✗ Certificate is FAKE";
-        statusClass = "fake";
-    } else if (status === "VERIFIED") {
-        icon = "✓";
-        color = "#10b981";
-        title = "Certificate Verified";
-        statusClass = "verified";
-    } else {
-        icon = "?";
-        color = "#6b7280";
-        title = "Unknown Status";
-        statusClass = "unknown";
-    }
-
-    // Platform-specific icons
-    if (platform) {
-        if (platform.includes("MongoDB")) platformIcon = "🍃";
-        else if (platform.includes("AWS")) platformIcon = "🔶";
-        else if (platform.includes("Google")) platformIcon = "🔷";
-        else if (platform.includes("Coursera")) platformIcon = "🎓";
-        else if (platform.includes("Udemy")) platformIcon = "📺";
-        else if (platform.includes("LinkedIn")) platformIcon = "🔗";
-    }
-
-    // Build details section
-    let detailsHtml = `<strong>Verification Details:</strong><br>`;
-    detailsHtml += `${reason}`;
-
-    if (platform) {
-        detailsHtml += `<br><br><strong>${platformIcon} Platform:</strong> ${platform}`;
-    }
-
-    if (certificateId) {
-        detailsHtml += `<br><strong>Certificate ID:</strong> <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">${certificateId}</code>`;
-    }
-
-    const modalHtml = `
-        <div class="verification-modal" onclick="closeVerificationModal(event)">
-            <div class="verification-content ${statusClass}" onclick="event.stopPropagation()">
-                <div class="verification-header" style="border-color: ${color}; display: flex; align-items: center; gap: 12px;">
-                    <span class="verification-icon" style="color: ${color}; font-size: 28px; font-weight: bold;">${icon}</span>
-                    <div>
-                        <h3 style="margin: 0; color: ${color};">${title}</h3>
-                        ${platform ? `<small style="color: #6b7280; font-weight: normal;">${platformIcon} ${platform}</small>` : ''}
-                    </div>
-                    <button class="close-btn" onclick="closeVerificationModal()" style="margin-left: auto;">×</button>
-                </div>
-                <div class="verification-body">
-                    <div class="verification-message" style="border-left: 4px solid ${color}; padding-left: 12px; margin: 16px 0; background: ${color}15; padding: 12px; border-radius: 4px;">
-                        <strong>Status:</strong> ${status}<br>
-                        ${reason}
-                    </div>
-                    <div class="verification-details" style="background: #f9fafb; padding: 12px; border-radius: 4px; line-height: 1.6;">
-                        ${detailsHtml}
-                    </div>
-                </div>
-                <div style="border-top: 1px solid #e5e7eb; padding-top: 12px; margin-top: 12px; font-size: 12px; color: #6b7280;">
-                    Verification started: ${new Date().toLocaleString()}
-                </div>
+    // Info grid
+    const fields = [
+        { label: 'Candidate Name', value: d.candidateName, mono: false },
+        { label: 'Credential ID', value: d.credentialId, mono: true },
+        { label: 'Exam / Course', value: d.examTitle, mono: false },
+        { label: 'Issued Date', value: d.issueDate, mono: false },
+        { label: 'Expiry Date', value: d.expiryDate, mono: false },
+        { label: 'Issuing Org', value: d.issuingOrg, mono: false },
+    ];
+    const grid = document.getElementById('infoGrid');
+    grid.innerHTML = fields.map(f => `
+        <div class="info-cell">
+            <div class="info-cell-label">${f.label}</div>
+            <div class="info-cell-value ${f.value ? (f.mono ? 'mono' : '') : 'empty'}">
+                ${escapeHtml(f.value) || 'Not detected'}
             </div>
+        </div>`).join('');
+
+    // Checks
+    const passed = d.passedChecks || [];
+    const failed = d.failedChecks || [];
+    document.getElementById('passedList').innerHTML = passed.length
+        ? passed.map((c, i) => checkHtml(c, i)).join('')
+        : '<div class="check-item" style="color:var(--text-gray);font-size:11px;">No checks passed</div>';
+    document.getElementById('failedList').innerHTML = failed.length
+        ? failed.map((c, i) => checkHtml(c, i)).join('')
+        : '<div class="check-item" style="color:var(--text-gray);font-size:11px;">No failures detected</div>';
+
+    // Raw text
+    document.getElementById('rawText').textContent = d.extractedText || '(no text extracted)';
+}
+
+function checkHtml(c, i) {
+    return `<div class="check-item" style="animation-delay:${i * 0.05}s">
+        <div class="check-dot"></div>
+        <div>
+            <div class="check-label">${escapeHtml(c.label)}</div>
+            ${c.detail ? `<div class="check-detail">${escapeHtml(c.detail)}</div>` : ''}
         </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    </div>`;
 }
 
-function closeVerificationModal(event) {
-    if (!event || event.target.classList.contains('verification-modal') || event.target.classList.contains('close-btn')) {
-        const modal = document.querySelector('.verification-modal');
-        if (modal) {
-            modal.remove();
-        }
+// Raw text toggle handler
+document.addEventListener('DOMContentLoaded', function() {
+    const rawToggle = document.getElementById('rawToggle');
+    if (rawToggle) {
+        rawToggle.addEventListener('click', function() {
+            const raw = document.getElementById('rawText');
+            raw.classList.toggle('show');
+            this.querySelector('span').textContent = raw.classList.contains('show') ? '▾' : '▸';
+            this.childNodes[1].textContent = raw.classList.contains('show') ? ' Hide extracted text' : ' View extracted text';
+        });
     }
-}
+
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            const certificateFile = document.getElementById('certificateFile');
+            const certificateText = document.getElementById('certificateText');
+            const resultsSection = document.getElementById('certificateResultsSection');
+            
+            if (certificateFile) certificateFile.value = '';
+            if (certificateText) certificateText.textContent = 'Choose Certificate';
+            if (resultsSection) resultsSection.classList.remove('show');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+});
 
 /* WELCOME ANIMATION */
 

@@ -68,6 +68,52 @@ if (!userEmail) window.location.href = "user_login.html";
     </div>
 </div>
 
+<!-- CERTIFICATE VERIFICATION RESULTS -->
+<div class="certificate-results-section" id="certificateResultsSection">
+    <h2>Certificate Verification Results</h2>
+    
+    <div id="certificateResultPanel" class="certificate-result-panel">
+        
+        <div class="verdict-banner" id="verdictBanner">
+            <div class="verdict-icon" id="verdictIcon"></div>
+            <div class="verdict-text">
+                <div class="verdict-title" id="verdictTitle"></div>
+                <div class="verdict-explanation" id="verdictExpl"></div>
+            </div>
+        </div>
+
+        <div class="confidence-wrap">
+            <div class="confidence-label">
+                <span>Confidence Score</span>
+                <span class="confidence-val" id="confVal">—</span>
+            </div>
+            <div class="confidence-track">
+                <div class="confidence-fill" id="confFill"></div>
+            </div>
+        </div>
+
+        <div class="info-grid" id="infoGrid"></div>
+
+        <div class="checks-row">
+            <div class="checks-box pass">
+                <div class="checks-box-title">✓ Passed Checks</div>
+                <div id="passedList"></div>
+            </div>
+            <div class="checks-box fail">
+                <div class="checks-box-title">✗ Failed Checks</div>
+                <div id="failedList"></div>
+            </div>
+        </div>
+
+        <button class="raw-toggle" id="rawToggle">
+            <span>▸</span> View extracted text
+        </button>
+        <pre class="raw-text" id="rawText"></pre>
+
+        <button class="btn-reset" id="resetBtn">↩ Verify another certificate</button>
+    </div>
+</div>
+
 <!-- SOCIAL PROFILES SECTION -->
 <div class="social-section" id="socialSection">
     <h2>Social Profile</h2>
