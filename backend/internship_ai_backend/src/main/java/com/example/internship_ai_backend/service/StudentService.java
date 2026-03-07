@@ -23,14 +23,31 @@ public class StudentService {
     // ===================== SIGNUP =====================
     public String signup(Student student) {
 
-        if (student.getEmail() == null || student.getPassword() == null) {
-            return "Email and Password are required!";
+        if (student.getEmail() == null) {
+            return "Email is required!";
+        }
+
+        // For local signup, password is required
+        if ("local".equals(student.getAuthProvider()) || student.getAuthProvider() == null) {
+            if (student.getPassword() == null) {
+                return "Password is required!";
+            }
+            student.setAuthProvider("local");
         }
 
         String email = student.getEmail().toLowerCase().trim();
 
         if (studentRepository.existsByEmail(email)) {
             return "Email already exists!";
+        }
+
+        // Check username uniqueness
+        if (student.getUsername() != null && !student.getUsername().trim().isEmpty()) {
+            String username = student.getUsername().trim();
+            if (studentRepository.existsByUsername(username)) {
+                return "Username already exists!";
+            }
+            student.setUsername(username);
         }
 
         student.setEmail(email);
@@ -41,24 +58,64 @@ public class StudentService {
     }
 
     // ===================== LOGIN =====================
-    public Optional<Student> login(String email, String password) {
+    public Optional<Student> login(String usernameOrEmail, String password) {
 
-        if (email == null || password == null) {
+        if (usernameOrEmail == null || password == null) {
             return Optional.empty();
         }
 
-        Optional<Student> optionalStudent =
-                studentRepository.findByEmail(email.toLowerCase().trim());
+        String input = usernameOrEmail.toLowerCase().trim();
+        Optional<Student> optionalStudent;
+
+        // Try email first
+        optionalStudent = studentRepository.findByEmail(input);
+
+        // If not found by email, try username
+        if (optionalStudent.isEmpty()) {
+            optionalStudent = studentRepository.findByUsername(input);
+        }
 
         if (optionalStudent.isPresent()) {
             Student student = optionalStudent.get();
 
-            if (student.getPassword().equals(password)) {
+            // Only allow password login for local auth
+            if ("local".equals(student.getAuthProvider()) && 
+                student.getPassword() != null && 
+                student.getPassword().equals(password)) {
                 return Optional.of(student);
             }
         }
 
         return Optional.empty();
+    }
+
+    // ===================== OAUTH LOGIN/SIGNUP =====================
+    public Student handleOAuthUser(String email, String name, String googleId) {
+        
+        // Check if user already exists with this Google ID
+        Optional<Student> existingByGoogleId = studentRepository.findByGoogleId(googleId);
+        if (existingByGoogleId.isPresent()) {
+            return existingByGoogleId.get();
+        }
+
+        // Check if user exists with this email (link accounts)
+        Optional<Student> existingByEmail = studentRepository.findByEmail(email.toLowerCase().trim());
+        if (existingByEmail.isPresent()) {
+            Student student = existingByEmail.get();
+            student.setGoogleId(googleId);
+            student.setAuthProvider("google");
+            return studentRepository.save(student);
+        }
+
+        // Create new user
+        Student newStudent = new Student();
+        newStudent.setEmail(email.toLowerCase().trim());
+        newStudent.setName(name);
+        newStudent.setGoogleId(googleId);
+        newStudent.setAuthProvider("google");
+        // No password needed for OAuth users
+        
+        return studentRepository.save(newStudent);
     }
 
     // ===================== GET PROFILE =====================

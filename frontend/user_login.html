@@ -71,12 +71,12 @@
 
             <div class="field">
               <label for="login-email">
-                Email address
+                Username or Email
                 <button type="button" class="lbl-link" onclick="handleForgotPassword()">Forgot password?</button>
               </label>
               <div class="input-wrap">
                 <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <input type="email" id="login-email" placeholder="you@university.edu" autocomplete="email"/>
+                <input type="text" id="login-email" placeholder="username or you@university.edu" autocomplete="email"/>
               </div>
               <div class="field-error" id="login-email-err">
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
@@ -145,6 +145,18 @@
                 <input type="text" id="signup-name" placeholder="Jane Smith" autocomplete="name"/>
               </div>
               <div class="field-error" id="signup-name-err">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="signup-username">Username</label>
+              <div class="input-wrap">
+                <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M8.5 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <input type="text" id="signup-username" placeholder="janesmith" autocomplete="username"/>
+              </div>
+              <div class="field-error" id="signup-username-err">
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5.5" stroke="currentColor"/><path d="M6 3.5v3M6 8.5v.5" stroke="currentColor" stroke-linecap="round"/></svg>
                 <span></span>
               </div>
