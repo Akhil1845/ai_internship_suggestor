@@ -1,9 +1,37 @@
 ﻿
   const API_BASE = "http://localhost:8089/api/students";
   const AUTH_BASE = "http://localhost:8089/api/auth";
-  const GOOGLE_CLIENT_ID = "489484268154-mllmp32m1cpk8db03sfcq8bstl01ogpt.apps.googleusercontent.com";
-  const REDIRECT_URI = "http://localhost:8089/api/auth/google/callback";
   const TRANSITION_MS = 250;
+  const PAGE_QUERY = new URLSearchParams(window.location.search);
+
+  let oauthSetupMode = PAGE_QUERY.get('oauthSetup') === 'true';
+  let oauthContext = {
+    userId: PAGE_QUERY.get('userId') || '',
+    email: PAGE_QUERY.get('email') || '',
+    name: PAGE_QUERY.get('name') || ''
+  };
+
+  function buildUsernameSuggestion(name, email) {
+    const source = (name && name.trim())
+      ? name.trim()
+      : ((email || '').split('@')[0] || 'student');
+
+    const normalized = source
+      .normalize('NFKD')
+      .replace(/[^\x00-\x7F]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '.')
+      .replace(/^\.+|\.+$/g, '')
+      .replace(/\.{2,}/g, '.');
+
+    if (normalized.length >= 3) return normalized;
+    return `student${Math.floor(Math.random() * 9000) + 1000}`;
+  }
+
+  function clearOAuthQueryFromUrl() {
+    const cleanPath = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanPath);
+  }
 
   // â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function showError(errEl, message) {
@@ -29,13 +57,20 @@
     return ct.includes('application/json') ? response.json() : response.text();
   }
 
-  function handleSocial(provider, flowMode = 'login') {
+  async function handleSocial(provider, flowMode = 'login') {
     if (provider === 'Google') {
-      // Redirect to Google OAuth
-      const scope = encodeURIComponent('email profile');
-      const state = encodeURIComponent(flowMode);
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&state=${state}`;
-      window.location.href = authUrl;
+      try {
+        const response = await fetch(`${AUTH_BASE}/google/login-url?flow=${encodeURIComponent(flowMode)}`);
+        const result = await parseApiResponse(response);
+
+        if (!response.ok || typeof result !== 'object' || !result.authUrl) {
+          throw new Error('Invalid OAuth login URL response');
+        }
+
+        window.location.href = result.authUrl;
+      } catch {
+        alert('Google login is currently unavailable. Please try again.');
+      }
     } else {
       alert(`${provider} OAuth is not yet implemented.`);
     }
@@ -205,8 +240,70 @@
   const signupPwErr       = document.getElementById('signup-password-err');
   const signupConfirmErr  = document.getElementById('signup-confirm-err');
 
+  function applyOAuthReturnState() {
+    const oauthError = PAGE_QUERY.get('oauthError');
+    const oauthSuccess = PAGE_QUERY.get('oauthSuccess') === 'true';
+
+    if (oauthError) {
+      switchPanel('login');
+      showError(loginPwErr, oauthError);
+      clearOAuthQueryFromUrl();
+      return;
+    }
+
+    if (oauthSuccess && oauthContext.userId && oauthContext.email) {
+      localStorage.setItem('studentId', String(oauthContext.userId));
+      localStorage.setItem('userEmail', oauthContext.email);
+      if (oauthContext.name) {
+        localStorage.setItem('userName', oauthContext.name);
+      }
+      clearOAuthQueryFromUrl();
+      window.location.href = 'dashboard.html';
+      return;
+    }
+
+    if (!oauthSetupMode || !oauthContext.userId || !oauthContext.email) {
+      return;
+    }
+
+    switchPanel('signup');
+
+    signupName.value = oauthContext.name || oauthContext.email.split('@')[0];
+    signupEmail.value = oauthContext.email;
+    const googleDisplayName = (oauthContext.name || '').trim();
+    signupUsername.value = googleDisplayName.length >= 3
+      ? googleDisplayName
+      : buildUsernameSuggestion(oauthContext.name, oauthContext.email);
+    signupPw.value = '';
+    signupConfirm.value = '';
+
+    // Keep Google identity fields fixed; user can only choose username/password.
+    signupName.readOnly = true;
+    signupEmail.readOnly = true;
+
+    const signupTitle = document.querySelector('#panel-signup .form-title');
+    const signupSub = document.querySelector('#panel-signup .form-sub');
+    if (signupTitle) signupTitle.textContent = 'Complete Google signup';
+    if (signupSub) signupSub.textContent = 'Confirm your username and create a password.';
+
+    const signupBtnText = btnSignup.querySelector('.btn-text');
+    if (signupBtnText) signupBtnText.textContent = 'Save and continue ->';
+
+    clearError(signupNameErr);
+    clearError(signupEmailErr);
+    clearError(signupUsernameErr);
+    clearError(signupPwErr);
+    clearError(signupConfirmErr);
+
+    updateSignupBtn();
+    signupUsername.focus();
+    clearOAuthQueryFromUrl();
+  }
+
   function updateSignupBtn() {
-    const nameOk     = signupName.value.trim().split(/\s+/).length >= 2;
+    const nameOk     = oauthSetupMode
+      ? signupName.value.trim().length >= 1
+      : signupName.value.trim().split(/\s+/).length >= 2;
     const usernameOk = signupUsername.value.trim().length >= 3;
     const emailOk    = isValidEmail(signupEmail.value);
     const pwOk       = signupPw.value.length >= 8;
@@ -221,6 +318,7 @@
   signupConfirm.addEventListener('input', updateSignupBtn);
 
   signupName.addEventListener('blur', () => {
+    if (oauthSetupMode) return;
     if (signupName.value && signupName.value.trim().split(/\s+/).length < 2) showError(signupNameErr, 'Please enter your full name');
     else if (signupName.value.trim()) clearError(signupNameErr);
   });
@@ -229,6 +327,7 @@
     else if (signupUsername.value.trim()) clearError(signupUsernameErr);
   });
   signupEmail.addEventListener('blur', () => {
+    if (oauthSetupMode) return;
     if (signupEmail.value && !isValidEmail(signupEmail.value)) showError(signupEmailErr, 'Enter a valid email address');
     else clearError(signupEmailErr);
   });
@@ -244,9 +343,9 @@
   document.getElementById('form-signup').addEventListener('submit', async (e) => {
     e.preventDefault();
     let valid = true;
-    if (!signupName.value.trim() || signupName.value.trim().split(/\s+/).length < 2) { showError(signupNameErr, 'Please enter your full name'); valid = false; }
+    if (!oauthSetupMode && (!signupName.value.trim() || signupName.value.trim().split(/\s+/).length < 2)) { showError(signupNameErr, 'Please enter your full name'); valid = false; }
     if (!signupUsername.value.trim() || signupUsername.value.trim().length < 3) { showError(signupUsernameErr, 'Username must be at least 3 characters'); valid = false; }
-    if (!isValidEmail(signupEmail.value)) { showError(signupEmailErr, 'Enter a valid email address'); valid = false; }
+    if (!oauthSetupMode && !isValidEmail(signupEmail.value)) { showError(signupEmailErr, 'Enter a valid email address'); valid = false; }
     if (signupPw.value.length < 8) { showError(signupPwErr, 'Password must be at least 8 characters'); valid = false; }
     if (signupConfirm.value !== signupPw.value) { showError(signupConfirmErr, 'Passwords do not match'); valid = false; }
     if (!valid) return;
@@ -257,6 +356,40 @@
     clearError(signupUsernameErr);
 
     try {
+      if (oauthSetupMode && oauthContext.userId) {
+        const response = await fetch(`${AUTH_BASE}/google/complete-signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: oauthContext.userId,
+            username: signupUsername.value.trim(),
+            password: signupPw.value
+          })
+        });
+
+        const result = await parseApiResponse(response);
+        const msg = (typeof result === 'string' && result.trim())
+          ? result
+          : (response.ok ? 'Google signup completed!' : 'Could not complete Google signup.');
+
+        if (!response.ok) {
+          if (msg.toLowerCase().includes('username')) {
+            showError(signupUsernameErr, msg);
+          } else if (msg.toLowerCase().includes('password')) {
+            showError(signupPwErr, msg);
+          } else {
+            showError(signupConfirmErr, msg);
+          }
+          return;
+        }
+
+        localStorage.setItem('studentId', String(oauthContext.userId));
+        localStorage.setItem('userEmail', oauthContext.email);
+        localStorage.setItem('userName', signupUsername.value.trim());
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
       const payload = {
         name: signupName.value.trim(),
         username: signupUsername.value.trim(),
@@ -265,11 +398,13 @@
         authProvider: 'local',
         studentClass: '', skills: '', preferredDomain: ''
       };
+
       const response = await fetch(`${API_BASE}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
       const result = await parseApiResponse(response);
       const msg = (typeof result === 'string' && result.trim())
         ? result
@@ -314,4 +449,6 @@
       alert('Could not connect to server.');
     }
   }
+
+  applyOAuthReturnState();
 

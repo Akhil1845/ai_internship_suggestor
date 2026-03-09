@@ -1,6 +1,7 @@
 package com.example.internship_ai_backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
@@ -24,6 +25,17 @@ public class OAuthController {
     @Autowired
     private StudentService studentService;
 
+    @Value("${app.frontend.base-url:http://localhost:5500/frontend}")
+    private String frontendBaseUrl;
+
+    private String buildFrontendUrl(String pathAndQuery) {
+        String baseUrl = frontendBaseUrl == null ? "http://localhost:5500" : frontendBaseUrl.trim();
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        return baseUrl + pathAndQuery;
+    }
+
     /**
      * Handle Google OAuth callback
      * This endpoint receives the authorization code from Google
@@ -34,7 +46,7 @@ public class OAuthController {
         
         try {
             String flowMode = (state == null || state.trim().isEmpty()) ? "login" : state.trim().toLowerCase();
-            String redirectUri = "http://localhost:8089/api/auth/google/callback";
+            String redirectUri = googleOAuthService.getRedirectUri();
             
             // Exchange code for access token
             String accessToken = googleOAuthService.exchangeCodeForToken(code, redirectUri);
@@ -59,10 +71,10 @@ public class OAuthController {
                 String encodedName = URLEncoder.encode(student.getName() == null ? "" : student.getName(), StandardCharsets.UTF_8);
 
                 if (needsSetup) {
-                redirectView.setUrl("http://localhost:5500/auth-callback.html?setup=true&userId=" +
+                redirectView.setUrl(buildFrontendUrl("/user_login.html?oauthSetup=true&userId=") +
                     student.getId() + "&email=" + encodedEmail + "&name=" + encodedName);
                 } else {
-                redirectView.setUrl("http://localhost:5500/auth-callback.html?success=true&userId=" +
+                redirectView.setUrl(buildFrontendUrl("/user_login.html?oauthSuccess=true&userId=") +
                     student.getId() + "&email=" + encodedEmail + "&name=" + encodedName);
                 }
             
@@ -73,8 +85,17 @@ public class OAuthController {
             
             // Redirect to frontend with error
             RedirectView redirectView = new RedirectView();
-            String encodedError = URLEncoder.encode(e.getMessage() == null ? "OAuth failed" : e.getMessage(), StandardCharsets.UTF_8);
-            redirectView.setUrl("http://localhost:5500/auth-callback.html?success=false&error=" + encodedError);
+            String safeMessage = "Google authentication failed. Please try again.";
+            String rawMessage = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+
+            if (rawMessage.contains("client secret is missing")) {
+                safeMessage = "Google OAuth is not configured on the server.";
+            } else if (rawMessage.contains("duplicate") || rawMessage.contains("already exists")) {
+                safeMessage = "Account already exists. Try logging in directly.";
+            }
+
+            String encodedError = URLEncoder.encode(safeMessage, StandardCharsets.UTF_8);
+            redirectView.setUrl(buildFrontendUrl("/user_login.html?oauthError=") + encodedError);
             
             return redirectView;
         }
@@ -84,20 +105,9 @@ public class OAuthController {
      * Endpoint for testing OAuth flow
      */
     @GetMapping("/google/login-url")
-    public ResponseEntity<?> getGoogleLoginUrl() {
-        
-        String clientId = "489484268154-mllmp32m1cpk8db03sfcq8bstl01ogpt.apps.googleusercontent.com";
-        String redirectUri = "http://localhost:8089/api/auth/google/callback";
-        String scope = "email profile";
-        String state = "random_state_string"; // Should be random for security
-        
-        String authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
-                "client_id=" + clientId +
-                "&redirect_uri=" + redirectUri +
-                "&response_type=code" +
-                "&scope=" + scope +
-                "&state=" + state;
-        
+    public ResponseEntity<?> getGoogleLoginUrl(@RequestParam(defaultValue = "login") String flow) {
+        String normalizedFlow = "signup".equalsIgnoreCase(flow) ? "signup" : "login";
+        String authUrl = googleOAuthService.buildAuthorizationUrl(normalizedFlow);
         return ResponseEntity.ok(Map.of("authUrl", authUrl));
     }
 

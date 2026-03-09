@@ -28,6 +28,29 @@ function updateCertificateText() {
         file ? file.name : "Choose Certificate";
 }
 
+function resetResumeRecommendationsUI() {
+    const matchedSection = document.getElementById("matchedInternshipsSection");
+    const matchedContainer = document.getElementById("matchedInternshipsContainer");
+    const resumeFile = document.getElementById("resumeFile");
+    const resumeText = document.getElementById("resumeText");
+
+    if (matchedSection) {
+        matchedSection.classList.remove("show");
+    }
+
+    if (matchedContainer) {
+        matchedContainer.innerHTML = '<div class="no-internships">Upload your resume to see matched internships based on your skills.</div>';
+    }
+
+    if (resumeFile) {
+        resumeFile.value = "";
+    }
+
+    if (resumeText) {
+        resumeText.innerText = "Choose Resume";
+    }
+}
+
 function escapeHtml(value) {
     return (value || "")
         .replace(/&/g, "&amp;")
@@ -35,6 +58,72 @@ function escapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/\"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+const MAX_RESUME_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_RESUME_EXTENSIONS = ["pdf", "doc", "docx", "txt"];
+
+function getFileExtension(filename) {
+    if (!filename || !filename.includes(".")) {
+        return "";
+    }
+    return filename.split(".").pop().toLowerCase();
+}
+
+function isAllowedResumeFile(file) {
+    const extension = getFileExtension(file?.name || "");
+    return ALLOWED_RESUME_EXTENSIONS.includes(extension);
+}
+
+function renderResumeBasedInternships(payload) {
+    const container = document.getElementById("matchedInternshipsContainer");
+    if (!container) {
+        return;
+    }
+
+    const recommendations = Array.isArray(payload?.recommendations) ? payload.recommendations : [];
+    const message = payload?.message || "";
+
+    if (recommendations.length === 0) {
+        container.innerHTML = `<div class="no-internships">${escapeHtml(message || "No resume-based internships found. Try uploading a clearer resume.")}</div>`;
+        return;
+    }
+
+    const sorted = recommendations
+        .map((item) => ({ ...item, matchScore: Number(item.matchScore) || 0 }))
+        .sort((a, b) => b.matchScore - a.matchScore);
+
+    const cards = sorted.map((item) => {
+        const title = escapeHtml(item.title || "Opportunity");
+        const company = escapeHtml(item.company || "Unknown Company");
+        const location = escapeHtml(item.location || "Location not specified");
+        const type = escapeHtml(item.type || "Internship/Job");
+        const source = escapeHtml(item.source || "Resume Matching");
+        const score = Number(item.matchScore) || 0;
+        const url = item.url && /^https?:\/\//i.test(item.url) ? item.url : "";
+        const skills = Array.isArray(item.matchedSkills)
+            ? item.matchedSkills.slice(0, 6).map((skill) => escapeHtml(skill)).join(", ")
+            : "General match";
+
+        return `
+            <div class="internship-card">
+                <div class="internship-header">
+                    <div>
+                        <h3 class="internship-title">${title}</h3>
+                        <p class="internship-company">${company}</p>
+                    </div>
+                    <span class="match-badge">${score}% Match</span>
+                </div>
+                <p class="internship-description">${type} • ${location} • ${source}</p>
+                <div class="internship-skills"><strong>Matched Skills:</strong> ${skills || "General match"}</div>
+                <button class="apply-btn" ${url ? `onclick="window.open('${escapeHtml(url)}', '_blank', 'noopener,noreferrer')"` : "disabled"}>
+                    ${url ? "Apply Now" : "No Link"}
+                </button>
+            </div>
+        `;
+    }).join("");
+
+    container.innerHTML = `<div class="matched-internships-grid">${cards}</div>`;
 }
 
 function renderRecommendations(payload) {
@@ -104,20 +193,56 @@ async function uploadResume() {
         return;
     }
 
+    if (!isAllowedResumeFile(file)) {
+        alert("Please upload a valid resume file: PDF, DOC, DOCX, or TXT.");
+        return;
+    }
+
+    if (file.size > MAX_RESUME_FILE_SIZE) {
+        alert("Resume file exceeds 10 MB limit.");
+        return;
+    }
+
     if (uploadButton) {
         uploadButton.disabled = true;
         uploadButton.innerText = "Processing...";
     }
 
-    // Show the matched internships section
     const matchedSection = document.getElementById("matchedInternshipsSection");
-    if (matchedSection) {
-        matchedSection.classList.add("show");
-    }
+    const matchedContainer = document.getElementById("matchedInternshipsContainer");
 
     try {
-        // Load matched internships from database
-        await loadMatchedInternships();
+        if (matchedSection) {
+            matchedSection.classList.add("show");
+        }
+        if (matchedContainer) {
+            matchedContainer.innerHTML = '<div class="no-internships">Analyzing resume and finding internships...</div>';
+        }
+
+        const formData = new FormData();
+        formData.append("resume", file);
+
+        const response = await fetch(`http://localhost:8089/api/students/resume/recommendations?email=${encodeURIComponent(userEmail)}`, {
+            method: "POST",
+            body: formData
+        });
+
+        const payload = await response.json();
+
+        // Check if the response indicates validation errors
+        if (payload?.recommendations && payload.recommendations.length === 0 && payload?.message) {
+            // This is a validation error from backend (not a resume)
+            if (matchedContainer) {
+                matchedContainer.innerHTML = `<div class="no-internships validation-error">${escapeHtml(payload.message)}</div>`;
+            }
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(payload?.message || `Resume upload failed (HTTP ${response.status})`);
+        }
+
+        renderResumeBasedInternships(payload);
         
         // Scroll to matched internships section
         if (matchedSection) {
@@ -125,7 +250,10 @@ async function uploadResume() {
         }
     } catch (error) {
         console.error("Resume processing error:", error);
-        alert("Failed to process resume. Please try again.");
+        if (matchedContainer) {
+            const errorMessage = error.message || "Failed to process resume. Please try a valid resume file.";
+            matchedContainer.innerHTML = `<div class="no-internships validation-error">${escapeHtml(errorMessage)}</div>`;
+        }
     } finally {
         if (uploadButton) {
             uploadButton.disabled = false;
@@ -349,12 +477,15 @@ function renderCertificateResult(d) {
 
     // Info grid
     const fields = [
+        { label: 'Certificate Type', value: d.certificateType, mono: false },
         { label: 'Candidate Name', value: d.candidateName, mono: false },
         { label: 'Credential ID', value: d.credentialId, mono: true },
         { label: 'Exam / Course', value: d.examTitle, mono: false },
         { label: 'Issued Date', value: d.issueDate, mono: false },
         { label: 'Expiry Date', value: d.expiryDate, mono: false },
         { label: 'Issuing Org', value: d.issuingOrg, mono: false },
+        { label: 'Authorized Signatory', value: d.authorizedSignatory, mono: false },
+        { label: 'Verification URL', value: d.verificationUrl, mono: true },
     ];
     const grid = document.getElementById('infoGrid');
     grid.innerHTML = fields.map(f => `
@@ -391,6 +522,8 @@ function checkHtml(c, i) {
 
 // Raw text toggle handler
 document.addEventListener('DOMContentLoaded', function() {
+    resetResumeRecommendationsUI();
+
     const rawToggle = document.getElementById('rawToggle');
     if (rawToggle) {
         rawToggle.addEventListener('click', function() {
@@ -1052,6 +1185,10 @@ async function loadUser() {
 }
 
 loadUser();
+
+window.addEventListener("pageshow", function () {
+    resetResumeRecommendationsUI();
+});
 
 document.getElementById("analyticsModal").addEventListener("click", function (event) {
     if (event.target.id === "analyticsModal") {

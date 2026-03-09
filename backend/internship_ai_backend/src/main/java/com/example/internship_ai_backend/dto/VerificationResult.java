@@ -18,6 +18,9 @@ public class VerificationResult {
     /** Confidence score 0–100 */
     private int confidenceScore;
 
+    /** Certificate title/type (academic/professional/training) */
+    private String certificateType;
+
     /** Extracted candidate name */
     private String candidateName;
 
@@ -36,6 +39,12 @@ public class VerificationResult {
     /** Issuing organisation found in document */
     private String issuingOrg;
 
+    /** Authorized signatory found in document */
+    private String authorizedSignatory;
+
+    /** Verification URL/QR target found in document */
+    private String verificationUrl;
+
     /** Which checks passed */
     private List<CheckItem> passedChecks;
 
@@ -51,19 +60,23 @@ public class VerificationResult {
     // Constructors
     public VerificationResult() {}
 
-    public VerificationResult(boolean authentic, String verdict, int confidenceScore, String candidateName,
-                             String credentialId, String examTitle, String issueDate, String expiryDate,
-                             String issuingOrg, List<CheckItem> passedChecks, List<CheckItem> failedChecks,
+    public VerificationResult(boolean authentic, String verdict, int confidenceScore, String certificateType,
+                             String candidateName, String credentialId, String examTitle, String issueDate, String expiryDate,
+                             String issuingOrg, String authorizedSignatory, String verificationUrl,
+                             List<CheckItem> passedChecks, List<CheckItem> failedChecks,
                              String explanation, String extractedText) {
         this.authentic = authentic;
         this.verdict = verdict;
         this.confidenceScore = confidenceScore;
+        this.certificateType = certificateType;
         this.candidateName = candidateName;
         this.credentialId = credentialId;
         this.examTitle = examTitle;
         this.issueDate = issueDate;
         this.expiryDate = expiryDate;
         this.issuingOrg = issuingOrg;
+        this.authorizedSignatory = authorizedSignatory;
+        this.verificationUrl = verificationUrl;
         this.passedChecks = passedChecks;
         this.failedChecks = failedChecks;
         this.explanation = explanation;
@@ -79,6 +92,9 @@ public class VerificationResult {
 
     public int getConfidenceScore() { return confidenceScore; }
     public void setConfidenceScore(int confidenceScore) { this.confidenceScore = confidenceScore; }
+
+    public String getCertificateType() { return certificateType; }
+    public void setCertificateType(String certificateType) { this.certificateType = certificateType; }
 
     public String getCandidateName() { return candidateName; }
     public void setCandidateName(String candidateName) { this.candidateName = candidateName; }
@@ -97,6 +113,12 @@ public class VerificationResult {
 
     public String getIssuingOrg() { return issuingOrg; }
     public void setIssuingOrg(String issuingOrg) { this.issuingOrg = issuingOrg; }
+
+    public String getAuthorizedSignatory() { return authorizedSignatory; }
+    public void setAuthorizedSignatory(String authorizedSignatory) { this.authorizedSignatory = authorizedSignatory; }
+
+    public String getVerificationUrl() { return verificationUrl; }
+    public void setVerificationUrl(String verificationUrl) { this.verificationUrl = verificationUrl; }
 
     public List<CheckItem> getPassedChecks() { return passedChecks; }
     public void setPassedChecks(List<CheckItem> passedChecks) { this.passedChecks = passedChecks; }
@@ -119,12 +141,15 @@ public class VerificationResult {
         private boolean authentic;
         private String verdict;
         private int confidenceScore;
+        private String certificateType;
         private String candidateName;
         private String credentialId;
         private String examTitle;
         private String issueDate;
         private String expiryDate;
         private String issuingOrg;
+        private String authorizedSignatory;
+        private String verificationUrl;
         private List<CheckItem> passedChecks;
         private List<CheckItem> failedChecks;
         private String explanation;
@@ -133,20 +158,23 @@ public class VerificationResult {
         public Builder authentic(boolean authentic) { this.authentic = authentic; return this; }
         public Builder verdict(String verdict) { this.verdict = verdict; return this; }
         public Builder confidenceScore(int confidenceScore) { this.confidenceScore = confidenceScore; return this; }
+        public Builder certificateType(String certificateType) { this.certificateType = certificateType; return this; }
         public Builder candidateName(String candidateName) { this.candidateName = candidateName; return this; }
         public Builder credentialId(String credentialId) { this.credentialId = credentialId; return this; }
         public Builder examTitle(String examTitle) { this.examTitle = examTitle; return this; }
         public Builder issueDate(String issueDate) { this.issueDate = issueDate; return this; }
         public Builder expiryDate(String expiryDate) { this.expiryDate = expiryDate; return this; }
         public Builder issuingOrg(String issuingOrg) { this.issuingOrg = issuingOrg; return this; }
+        public Builder authorizedSignatory(String authorizedSignatory) { this.authorizedSignatory = authorizedSignatory; return this; }
+        public Builder verificationUrl(String verificationUrl) { this.verificationUrl = verificationUrl; return this; }
         public Builder passedChecks(List<CheckItem> passedChecks) { this.passedChecks = passedChecks; return this; }
         public Builder failedChecks(List<CheckItem> failedChecks) { this.failedChecks = failedChecks; return this; }
         public Builder explanation(String explanation) { this.explanation = explanation; return this; }
         public Builder extractedText(String extractedText) { this.extractedText = extractedText; return this; }
 
         public VerificationResult build() {
-            return new VerificationResult(authentic, verdict, confidenceScore, candidateName,
-                    credentialId, examTitle, issueDate, expiryDate, issuingOrg,
+            return new VerificationResult(authentic, verdict, confidenceScore, certificateType, candidateName,
+                    credentialId, examTitle, issueDate, expiryDate, issuingOrg, authorizedSignatory, verificationUrl,
                     passedChecks, failedChecks, explanation, extractedText);
         }
     }

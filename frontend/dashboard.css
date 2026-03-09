@@ -996,6 +996,14 @@ input[type="file"] {
     font-weight: 500;
 }
 
+.no-internships.validation-error {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+    border: 2px solid #f97316;
+    color: #c2410c;
+    font-weight: 600;
+    font-size: 15px;
+}
+
 @media (max-width: 760px) {
     .analytics-stats {
         grid-template-columns: 1fr;

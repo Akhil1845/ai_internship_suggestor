@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.*;
 
@@ -92,6 +95,14 @@ public class MongoDBCertificateVerificationService {
             "(?i)(?:expir(?:es?|ation|y))[:\\s]+([A-Za-z]+ \\d{1,2},?\\s*\\d{4}|\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})"
     );
 
+        private static final Pattern VERIFICATION_URL_PATTERN = Pattern.compile(
+            "(?i)(https?://[^\\s)]+|(?:www\\.)[^\\s)]+)"
+        );
+
+        private static final Pattern SIGNATORY_PATTERN = Pattern.compile(
+            "(?i)(?:signed by|authorized by|signatory|signature)[:\\s]+([A-Z][a-zA-Z .'-]{2,80})"
+        );
+
     // ── Name pattern (lines before/after "has successfully completed") ─────────
     private static final Pattern NAME_AFTER_CERTIFIES = Pattern.compile(
             "(?i)(?:this certifies that|certify that|awarded to|presented to|this is to certify)[\\s\\r\\n]+([A-Z][a-zA-Z .'-]{2,50})"
@@ -118,6 +129,7 @@ public class MongoDBCertificateVerificationService {
     private static final int WEIGHT_ISSUER           = 20;
     private static final int WEIGHT_KNOWN_COURSE     = 20;
     private static final int WEIGHT_CREDENTIAL_ID    = 10;
+    private static final int WEIGHT_VERIFICATION_REF = 8;
     private static final int WEIGHT_BONUS_PHRASE     = 2;   // per phrase (9 max = 18)
     private static final int PENALTY_RED_FLAG        = 30;  // per red flag
 
@@ -153,6 +165,7 @@ public class MongoDBCertificateVerificationService {
         List<CheckItem> passed  = new ArrayList<>();
         List<CheckItem> failed  = new ArrayList<>();
         int score = 0;
+        int redFlagHits = 0;
 
         // ── Required phrases ─────────────────────────────────────────────────
         for (String phrase : REQUIRED_PHRASES) {
@@ -191,6 +204,14 @@ public class MongoDBCertificateVerificationService {
             failed.add(new CheckItem("No credential ID found", "Genuine MongoDB certs include a verifiable credential ID"));
         }
 
+        String verificationUrl = extractVerificationUrl(rawText);
+        if (verificationUrl != null) {
+            passed.add(new CheckItem("Verification URL found", verificationUrl));
+            score += WEIGHT_VERIFICATION_REF;
+        } else {
+            failed.add(new CheckItem("Verification URL missing", "No verify URL/QR target detected in certificate text"));
+        }
+
         // ── Bonus phrases ─────────────────────────────────────────────────────
         for (String phrase : BONUS_PHRASES) {
             if (text.contains(phrase)) {
@@ -204,40 +225,106 @@ public class MongoDBCertificateVerificationService {
             if (text.contains(flag)) {
                 failed.add(new CheckItem("Red flag: '" + flag + "'", "Suspicious term found in document"));
                 score -= PENALTY_RED_FLAG;
+                redFlagHits++;
             }
         }
 
         // 3. Extract fields
+        String certificateType = detectCertificateType(rawText, matchedCourse.orElse(null));
         String candidateName = extractCandidateName(rawText);
         String issueDate     = extractDate(rawText, DATE_PATTERN);
         String expiryDate    = extractDate(rawText, EXPIRY_PATTERN);
         String examTitle     = extractExamTitle(rawText);
         String issuingOrg    = extractIssuer(rawText);
+        String authorizedSignatory = extractSignatory(rawText);
+
+        boolean dateConsistencyOk = areDatesConsistent(issueDate, expiryDate);
+        if (dateConsistencyOk) {
+            passed.add(new CheckItem("Date consistency", "Issue/expiry dates are logical"));
+        } else {
+            failed.add(new CheckItem("Date mismatch", "Expiry date appears earlier than issue date or invalid format"));
+            score -= 20;
+        }
+
+        boolean hasCriticalData = issuerFound
+                && credentialId != null
+                && candidateName != null
+                && issueDate != null
+                && examTitle != null;
+
+        if (!hasCriticalData) {
+            failed.add(new CheckItem("Critical details missing", "One or more mandatory identity fields are missing"));
+            score -= 25;
+        }
 
         // 4. Clamp score and decide verdict
         score = Math.max(0, Math.min(100, score));
-        boolean authentic = score >= 60 && issuerFound;
+        boolean authentic = score >= 75 && hasCriticalData && dateConsistencyOk && redFlagHits == 0;
 
-        String verdict;
-        String explanation;
+        int confidenceScore = score;
         if (authentic) {
-            verdict     = "✅ Certificate Appears Genuine";
-            explanation = buildAuthenticExplanation(score, passed.size(), failed.size());
+            confidenceScore = Math.max(score, 80);
+        } else if (!hasCriticalData || redFlagHits > 0 || !dateConsistencyOk) {
+            confidenceScore = Math.min(score, 45);
         } else {
-            verdict     = "❌ Certificate Could Not Be Verified";
-            explanation = buildFakeExplanation(score, issuerFound, matchedCourse.isPresent(), credentialId);
+            confidenceScore = Math.min(score, 65);
         }
+
+        String verdict = authentic ? "✅ REAL" : "❌ FAKE";
+        String reason = authentic
+                ? "Core issuer, identity fields, credential ID, and date checks are consistent."
+                : "Critical validation signals are missing or suspicious, so authenticity cannot be trusted.";
+
+        List<String> analysisPoints = new ArrayList<>();
+        analysisPoints.add(issuerFound
+                ? "Issuer legitimacy check passed: MongoDB official issuer markers found."
+                : "Issuer legitimacy check failed: no official MongoDB issuer marker found.");
+        analysisPoints.add(credentialId != null
+                ? "Certificate ID present: " + credentialId
+                : "Certificate ID missing or invalid format.");
+        analysisPoints.add(dateConsistencyOk
+                ? "Date logic appears consistent."
+                : "Date logic is inconsistent (expiry earlier than issue or invalid date format).");
+        if (authorizedSignatory != null) {
+            analysisPoints.add("Authorized signatory detected: " + authorizedSignatory + ".");
+        } else {
+            analysisPoints.add("Authorized signatory not detected from extracted text.");
+        }
+        if (verificationUrl != null) {
+            analysisPoints.add("Verification URL extracted: " + verificationUrl + ".");
+        } else {
+            analysisPoints.add("No verification URL/QR target found in extractable text.");
+        }
+
+        String explanation = buildStructuredExplanation(
+                certificateType,
+                candidateName,
+                issuingOrg,
+                issueDate,
+                expiryDate,
+                credentialId,
+                examTitle,
+                authorizedSignatory,
+                verificationUrl,
+                analysisPoints,
+                verdict,
+                confidenceScore,
+                reason
+        );
 
         return VerificationResult.builder()
                 .authentic(authentic)
                 .verdict(verdict)
-                .confidenceScore(score)
+                .confidenceScore(confidenceScore)
+                .certificateType(certificateType)
                 .candidateName(candidateName)
                 .credentialId(credentialId)
                 .examTitle(examTitle)
                 .issueDate(issueDate)
                 .expiryDate(expiryDate)
                 .issuingOrg(issuingOrg)
+                .authorizedSignatory(authorizedSignatory)
+                .verificationUrl(verificationUrl)
                 .passedChecks(passed)
                 .failedChecks(failed)
                 .explanation(explanation)
@@ -308,36 +395,146 @@ public class MongoDBCertificateVerificationService {
         return null;
     }
 
+    private String extractSignatory(String rawText) {
+        Matcher matcher = SIGNATORY_PATTERN.matcher(rawText);
+        if (matcher.find()) {
+            return capitalise(matcher.group(1).trim());
+        }
+        return null;
+    }
+
+    private String extractVerificationUrl(String rawText) {
+        Matcher matcher = VERIFICATION_URL_PATTERN.matcher(rawText);
+        while (matcher.find()) {
+            String url = matcher.group(1).trim();
+            String lower = url.toLowerCase(Locale.ROOT);
+            if (lower.contains("mongodb") || lower.contains("verify") || lower.contains("credential")) {
+                return lower.startsWith("http") ? url : "https://" + url;
+            }
+        }
+        return null;
+    }
+
+    private String detectCertificateType(String rawText, String matchedCourse) {
+        String lower = rawText.toLowerCase(Locale.ROOT);
+        if (lower.contains("associate") || lower.contains("professional") || lower.contains("certification")) {
+            return "Professional Certification";
+        }
+        if (lower.contains("course") || lower.contains("training") || lower.contains("completion")) {
+            return "Training/Completion Certificate";
+        }
+        if (matchedCourse != null && !matchedCourse.isBlank()) {
+            return "Professional Course Certificate";
+        }
+        return "Certificate";
+    }
+
+    private boolean areDatesConsistent(String issueDate, String expiryDate) {
+        if (issueDate == null || expiryDate == null) {
+            return true;
+        }
+        LocalDate issue = parseDate(issueDate);
+        LocalDate expiry = parseDate(expiryDate);
+        if (issue == null || expiry == null) {
+            return true;
+        }
+        return !expiry.isBefore(issue);
+    }
+
+    private LocalDate parseDate(String dateText) {
+        if (dateText == null || dateText.isBlank()) {
+            return null;
+        }
+        List<DateTimeFormatter> formats = List.of(
+                DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("M/d/yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("d/M/yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("M-d-yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("d-M-yyyy", Locale.ENGLISH)
+        );
+
+        String normalized = dateText.trim().replaceAll("\\s+", " ");
+        for (DateTimeFormatter formatter : formats) {
+            try {
+                return LocalDate.parse(normalized, formatter);
+            } catch (DateTimeParseException ignored) {
+                // try next format
+            }
+        }
+        return null;
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     private VerificationResult buildFakeResult(String reason, String rawText) {
         return VerificationResult.builder()
                 .authentic(false)
-                .verdict("❌ Certificate Could Not Be Verified")
+                .verdict("❌ FAKE")
                 .confidenceScore(0)
-                .explanation(reason)
+                .certificateType("Certificate")
+                .explanation(buildStructuredExplanation(
+                        "Certificate",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of("Could not extract enough certificate text for trustworthy verification."),
+                        "❌ FAKE",
+                        0,
+                        reason
+                ))
                 .passedChecks(List.of())
                 .failedChecks(List.of(new CheckItem("PDF parsing", reason)))
                 .extractedText(rawText)
                 .build();
     }
 
-    private String buildAuthenticExplanation(int score, int passed, int failed) {
-        return String.format(
-                "This document matches the structure and content of an official MongoDB University certificate. "
-                + "%d verification checks passed and %d failed, yielding a confidence score of %d/100. "
-                + "The issuer, course title, and certificate phrases align with known MongoDB University records.",
-                passed, failed, score);
+    private String buildStructuredExplanation(String type,
+                                              String recipient,
+                                              String issuedBy,
+                                              String issueDate,
+                                              String expiryDate,
+                                              String certificateId,
+                                              String courseOrAchievement,
+                                              String signatory,
+                                              String verificationUrl,
+                                              List<String> analysisPoints,
+                                              String verdict,
+                                              int confidence,
+                                              String reason) {
+        StringBuilder analysis = new StringBuilder();
+        if (analysisPoints != null) {
+            for (String point : analysisPoints) {
+                analysis.append("- ").append(point).append("\n");
+            }
+        }
+
+        return "---\n"
+                + "CERTIFICATE DETAILS:\n"
+                + "- Type: " + safeValue(type) + "\n"
+                + "- Recipient: " + safeValue(recipient) + "\n"
+                + "- Issued By: " + safeValue(issuedBy) + "\n"
+                + "- Issue Date: " + safeValue(issueDate) + "\n"
+                + "- Expiry Date: " + safeValue(expiryDate) + "\n"
+                + "- Certificate ID: " + safeValue(certificateId) + "\n"
+                + "- Course/Achievement: " + safeValue(courseOrAchievement) + "\n"
+                + "- Signatory: " + safeValue(signatory) + "\n"
+                + "- Verification URL: " + safeValue(verificationUrl) + "\n\n"
+                + "ANALYSIS:\n"
+                + analysis
+                + "\nVERDICT: " + verdict + "\n"
+                + "Confidence: " + confidence + "%\n"
+                + "Reason: " + safeValue(reason) + "\n"
+                + "---";
     }
 
-    private String buildFakeExplanation(int score, boolean issuer, boolean course, String credId) {
-        StringBuilder sb = new StringBuilder(
-                "This document could not be verified as a genuine MongoDB University certificate. ");
-        if (!issuer)  sb.append("No official MongoDB issuer was found. ");
-        if (!course)  sb.append("The course title does not match any known MongoDB curriculum. ");
-        if (credId == null) sb.append("No credential ID was detected. ");
-        sb.append(String.format("Confidence score: %d/100 (threshold: 60).", score));
-        return sb.toString();
+    private String safeValue(String value) {
+        return value == null || value.isBlank() ? "Not detected" : value;
     }
 
     private String capitalise(String s) {

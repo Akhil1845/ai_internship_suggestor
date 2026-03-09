@@ -9,6 +9,7 @@ public class JacksonConfiguration {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        // Register available Jackson modules (including JavaTimeModule for LocalDateTime).
+        return new ObjectMapper().findAndRegisterModules();
     }
 }

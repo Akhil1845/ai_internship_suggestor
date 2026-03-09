@@ -14,6 +14,12 @@ import java.util.stream.Collectors;
 @Service
 public class InternshipMatchingService {
 
+    private static final Set<String> SKILL_NOISE = Set.of(
+            "experience", "experienced", "project", "projects", "skill", "skills", "resume", "candidate",
+            "platform", "multiple", "seeking", "motivated", "technical", "development", "learning", "sharing", "document", "client",
+            "team", "role", "position", "work", "working", "the", "and", "for", "with", "from", "into", "about"
+    );
+
     @Autowired
     private InternshipRepository internshipRepository;
 
@@ -81,20 +87,22 @@ public class InternshipMatchingService {
      */
     private int calculateMatchScore(Internship internship, Set<String> studentSkills, String preferredDomain) {
         int score = 0;
+        int matchedSkillsCount = 0;
 
         // Parse internship required skills
         Set<String> requiredSkills = parseSkills(internship.getRequiredSkills());
         
         // Score based on exact skill matches
-        int skillMatches = 0;
         for (String skill : studentSkills) {
             if (requiredSkills.contains(skill.toLowerCase())) {
-                skillMatches++;
+                matchedSkillsCount++;
+                score += 10; // 10 points per matching skill
             }
         }
 
-        if (skillMatches > 0) {
-            score += skillMatches * 15; // 15 points per matching skill
+        // If required skills exist, must match at least 1 to proceed
+        if (!requiredSkills.isEmpty() && matchedSkillsCount == 0) {
+            return 0; // No match if no required skills met
         }
 
         // If no skills field, match against title and description keywords
@@ -103,28 +111,17 @@ public class InternshipMatchingService {
             String description = internship.getDescription() != null ? internship.getDescription().toLowerCase() : "";
             String combined = title + " " + description;
             
-            int keywordMatches = 0;
             for (String skill : studentSkills) {
                 if (combined.contains(skill.toLowerCase())) {
-                    keywordMatches++;
+                    matchedSkillsCount++;
+                    score += 8; // 8 points per keyword match
                 }
-            }
-            
-            if (keywordMatches > 0) {
-                score += keywordMatches * 10; // 10 points per keyword match
             }
         }
 
-        // Give minimum score if no matches yet but title contains tech keywords
-        if (score == 0) {
-            String title = internship.getTitle() != null ? internship.getTitle().toLowerCase() : "";
-            if (title.contains("developer") || title.contains("engineer") || 
-                title.contains("software") || title.contains("tech") || 
-                title.contains("full stack") || title.contains("backend") || 
-                title.contains("frontend") || title.contains("ai") || 
-                title.contains("data") || title.contains("devops")) {
-                score = 5; // Minimum score for tech-related jobs
-            }
+        // Must have at least 2 skill matches to be considered
+        if (matchedSkillsCount < 2) {
+            return 0;
         }
 
         // Domain preference bonus
@@ -134,24 +131,24 @@ public class InternshipMatchingService {
         
         if (!preferredDomain.isEmpty()) {
             if (title.contains(preferredDomain) || description.contains(preferredDomain)) {
-                score += 20;
+                score += 15; // Bonus for domain match
             }
         }
 
-        // Bonus for full-time/long-term internships
-        String duration = internship.getDuration() != null ? 
-                         internship.getDuration().toLowerCase() : "";
-        if (duration.contains("6") || duration.contains("full") || duration.contains("semester")) {
-            score += 10;
+        // Calculate percentage based on required skills
+        int percentage;
+        if (!requiredSkills.isEmpty()) {
+            // Calculate as percentage of required skills matched
+            percentage = (matchedSkillsCount * 100) / requiredSkills.size();
+            // Add base score points
+            percentage = Math.min(100, percentage + (score / 10));
+        } else {
+            // Convert points to percentage (max ~80 for non-required matches)
+            percentage = Math.min(80, score);
         }
 
-        // Bonus for internships with stipend
-        String stipend = internship.getStipend() != null ? internship.getStipend() : "";
-        if (!stipend.isEmpty() && !stipend.toLowerCase().contains("unpaid")) {
-            score += 5;
-        }
-
-        return score;
+        // Minimum threshold of 15% to show
+        return percentage >= 15 ? percentage : 0;
     }
 
     /**
@@ -193,11 +190,42 @@ public class InternshipMatchingService {
             return new HashSet<>();
         }
 
-        return Arrays.stream(skillsStr.split(","))
-            .map(String::trim)
-            .map(String::toLowerCase)
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toSet());
+        Set<String> parsed = new HashSet<>();
+        String normalized = skillsStr.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9+#.\\-/,;\\n ]", " ");
+
+        for (String part : normalized.split("[,;/|\\n]+")) {
+            String phrase = part.trim();
+            if (phrase.isEmpty()) {
+                continue;
+            }
+
+            if (isLikelySkillToken(phrase)) {
+                parsed.add(phrase);
+            }
+
+            for (String token : phrase.split("\\s+")) {
+                String cleaned = token.trim();
+                if (isLikelySkillToken(cleaned)) {
+                    parsed.add(cleaned);
+                }
+            }
+        }
+
+        return parsed;
+    }
+
+    private boolean isLikelySkillToken(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        String normalized = token.trim().toLowerCase(Locale.ENGLISH);
+        if (normalized.length() < 2 || normalized.length() > 28) {
+            return false;
+        }
+        if (SKILL_NOISE.contains(normalized)) {
+            return false;
+        }
+        return normalized.matches("[a-z0-9+#.\\- ]+");
     }
 
     /**

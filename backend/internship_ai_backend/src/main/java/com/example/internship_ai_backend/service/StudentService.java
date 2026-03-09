@@ -14,6 +14,8 @@ import java.util.*;
 @Service
 public class StudentService {
 
+    private static final String OAUTH_PASSWORD_PREFIX = "oauth_google_";
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -48,7 +50,7 @@ public class StudentService {
         if (student.getUsername() != null && !student.getUsername().trim().isEmpty()) {
             String username = student.getUsername().trim().toLowerCase();
             if (studentRepository.existsByUsername(username)) {
-                return "Username already exists!";
+                return "Username is already taken. Please choose another one.";
             }
             student.setUsername(username);
         }
@@ -92,6 +94,11 @@ public class StudentService {
 
     // ===================== OAUTH LOGIN/SIGNUP =====================
     public Student handleOAuthUser(String email, String name, String googleId) {
+        String normalizedEmail = email == null ? "" : email.toLowerCase().trim();
+        String resolvedName = (name == null || name.trim().isEmpty())
+                ? (normalizedEmail.contains("@") ? normalizedEmail.substring(0, normalizedEmail.indexOf('@')) : "Google User")
+                : name.trim();
+        String oauthPassword = buildOAuthPlaceholderPassword(googleId, normalizedEmail);
         
         // Check if user already exists with this Google ID
         Optional<Student> existingByGoogleId = studentRepository.findByGoogleId(googleId);
@@ -100,25 +107,38 @@ public class StudentService {
         }
 
         // Check if user exists with this email (link accounts)
-        Optional<Student> existingByEmail = studentRepository.findByEmail(email.toLowerCase().trim());
+        Optional<Student> existingByEmail = studentRepository.findByEmail(normalizedEmail);
         if (existingByEmail.isPresent()) {
             Student student = existingByEmail.get();
             student.setGoogleId(googleId);
+            if (student.getName() == null || student.getName().trim().isEmpty()) {
+                student.setName(resolvedName);
+            }
             if (student.getAuthProvider() == null || student.getAuthProvider().trim().isEmpty()) {
                 student.setAuthProvider("google");
+            }
+            if (student.getPassword() == null || student.getPassword().trim().isEmpty()) {
+                student.setPassword(oauthPassword);
             }
             return studentRepository.save(student);
         }
 
         // Create new user
         Student newStudent = new Student();
-        newStudent.setEmail(email.toLowerCase().trim());
-        newStudent.setName(name);
+        newStudent.setEmail(normalizedEmail);
+        newStudent.setName(resolvedName);
         newStudent.setGoogleId(googleId);
         newStudent.setAuthProvider("google");
-        // No password needed for OAuth users
+        // Keep a non-null placeholder to satisfy DB schemas that require password.
+        newStudent.setPassword(oauthPassword);
         
         return studentRepository.save(newStudent);
+    }
+
+    private String buildOAuthPlaceholderPassword(String googleId, String email) {
+        String idPart = (googleId == null || googleId.isBlank()) ? "id" : googleId.trim();
+        String emailPart = (email == null || email.isBlank()) ? "user" : email.replaceAll("[^a-zA-Z0-9]", "");
+        return OAUTH_PASSWORD_PREFIX + idPart + "_" + emailPart;
     }
 
     // ===================== COMPLETE GOOGLE SIGNUP =====================
@@ -147,7 +167,7 @@ public class StudentService {
 
         Optional<Student> existingByUsername = studentRepository.findByUsername(normalizedUsername);
         if (existingByUsername.isPresent() && !existingByUsername.get().getId().equals(studentId)) {
-            return "Username already exists!";
+            return "Username is already taken. Please choose another one.";
         }
 
         student.setUsername(normalizedUsername);

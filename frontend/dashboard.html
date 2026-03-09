@@ -41,7 +41,7 @@ if (!userEmail) window.location.href = "user_login.html";
 
             <label class="custom-file">
                 <span id="resumeText">Choose Resume</span>
-                <input type="file" id="resumeFile" onchange="updateResumeText()">
+                <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.txt,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="updateResumeText()">
             </label>
 
             <button onclick="uploadResume()">Upload & Get Internships</button>
