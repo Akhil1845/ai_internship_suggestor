@@ -69,6 +69,61 @@ public class StudentController {
                 .body("Invalid credentials!");
     }
 
+        // ===================== FORGOT PASSWORD VERIFY =====================
+        @PostMapping("/forgot-password/verify")
+        public ResponseEntity<String> verifyForgotPassword(@RequestBody Map<String, String> payload) {
+
+                String email = payload.get("email");
+                String identifier = payload.get("identifier");
+
+                String result = studentService.verifyPasswordResetIdentity(email, identifier);
+
+                if (result.equals("Identity verified!")) {
+                        return ResponseEntity.ok(result);
+                }
+
+                HttpStatus status;
+                if (result.equals("User not found!")) {
+                        status = HttpStatus.NOT_FOUND;
+                } else if (result.startsWith("Verification failed!")) {
+                        status = HttpStatus.UNAUTHORIZED;
+                } else {
+                        status = HttpStatus.BAD_REQUEST;
+                }
+
+                return ResponseEntity
+                                .status(status)
+                                .body(result);
+        }
+
+        // ===================== FORGOT PASSWORD RESET =====================
+        @PostMapping("/forgot-password")
+        public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> payload) {
+
+                String email = payload.get("email");
+                String identifier = payload.get("identifier");
+                String newPassword = payload.get("newPassword");
+
+                String result = studentService.resetPassword(email, identifier, newPassword);
+
+                if (result.equals("Password reset successful!")) {
+                        return ResponseEntity.ok(result);
+                }
+
+                HttpStatus status;
+                if (result.equals("User not found!")) {
+                        status = HttpStatus.NOT_FOUND;
+                } else if (result.startsWith("Verification failed!")) {
+                        status = HttpStatus.UNAUTHORIZED;
+                } else {
+                        status = HttpStatus.BAD_REQUEST;
+                }
+
+                return ResponseEntity
+                                .status(status)
+                                .body(result);
+        }
+
     // ===================== GET STUDENT PROFILE =====================
     @GetMapping("/profile")
     public ResponseEntity<?> getStudent(@RequestParam String email) {

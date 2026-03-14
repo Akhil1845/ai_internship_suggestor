@@ -31,6 +31,11 @@ if (!userEmail) window.location.href = "user_login.html";
     </div>
 
     <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Choose a unique username">
+    </div>
+
+    <div class="form-group">
         <label>Primary Email</label>
         <input type="email" id="email" disabled>
     </div>
@@ -210,6 +215,7 @@ async function loadProfile() {
         const data = await response.json();
 
         document.getElementById("name").value = data.name || "";
+        document.getElementById("username").value = data.username || "";
         document.getElementById("email").value = data.email || "";
         document.getElementById("qualification").value = data.qualification || "";
         document.getElementById("secondaryEmail").value = data.secondaryEmail || "";
@@ -230,8 +236,18 @@ async function loadProfile() {
 
 async function saveProfile() {
 
+    const statusEl = document.getElementById("status");
+    const username = document.getElementById("username").value.trim();
+
+    if (!username || username.length < 3) {
+        statusEl.style.color = "#dc2626";
+        statusEl.innerText = "Username must be at least 3 characters";
+        return;
+    }
+
     const profileData = {
-        name: document.getElementById("name").value,
+        name: document.getElementById("name").value.trim(),
+        username,
         qualification: document.getElementById("qualification").value,
         secondaryEmail: document.getElementById("secondaryEmail").value,
         contactNumber: document.getElementById("contactNumber").value,
@@ -252,7 +268,14 @@ async function saveProfile() {
 
     const result = await response.text();
 
-    document.getElementById("status").innerText = result;
+    if (response.ok) {
+        statusEl.style.color = "#16a34a";
+        statusEl.innerText = result;
+        localStorage.setItem("userName", username);
+    } else {
+        statusEl.style.color = "#dc2626";
+        statusEl.innerText = result || "Failed to update profile";
+    }
 }
 
 /* ================= LOAD SOCIAL PROFILES ================= */

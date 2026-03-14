@@ -143,6 +143,7 @@ input {
     background: var(--bg-card);
     border-radius: 20px;
     padding: 32px;
+    box-sizing: border-box;
     box-shadow: 0 20px 50px rgba(0,0,0,0.05);
     opacity: 0;
     visibility: hidden;
@@ -166,13 +167,15 @@ input {
     background: var(--sub-bg);
     border-radius: 12px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) fit-content(160px);
     column-gap: 12px;
     align-items: end;
     transition: all 0.3s;
     opacity: 1;
     transform: translateY(0);
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .profile-card:hover {
@@ -195,6 +198,9 @@ input {
     gap: 8px;
     flex-shrink: 0;
     align-self: end;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
 }
 
 .delete-btn {
@@ -458,12 +464,17 @@ input {
 }
 
 @media (max-width: 768px) {
+    .social-section {
+        padding: 20px;
+    }
+
     .profile-card {
         grid-template-columns: 1fr;
     }
 
     .profile-actions {
         justify-content: flex-end;
+        width: 100%;
     }
 
     .project-form-grid {

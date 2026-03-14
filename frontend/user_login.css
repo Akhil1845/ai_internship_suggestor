@@ -550,6 +550,165 @@
 
     .terms-note a:hover { color: var(--amber); }
 
+    /* â”€â”€ FORGOT PASSWORD MODAL â”€â”€ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: rgba(4, 6, 10, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px;
+      padding: 28px 24px 24px;
+      box-shadow:
+        0 0 0 1px rgba(245,158,11,0.08),
+        0 24px 60px rgba(0,0,0,0.45),
+        0 2px 0 0 rgba(245,158,11,0.15) inset;
+      position: relative;
+    }
+
+    .modal-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,158,11,0.45), transparent);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .modal-sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .modal-close {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--body);
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+      border-color: rgba(245,158,11,0.3);
+      background: rgba(245,158,11,0.12);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+
+    .modal-help-row {
+      display: flex;
+      justify-content: flex-end;
+      margin: -6px 0 12px;
+    }
+
+    .modal-link-btn {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--amber);
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0;
+      line-height: 1.2;
+    }
+
+    .modal-link-btn:hover {
+      color: var(--amber-lt);
+    }
+
+    .support-note {
+      margin-top: -2px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .support-note.hidden,
+    .field.hidden {
+      display: none;
+    }
+
+    .support-note a {
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    .support-note a:hover {
+      color: var(--amber-lt);
+    }
+
+    .btn-secondary {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #cbd5e1;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.14);
+      color: #fff;
+    }
+
+    .modal-submit {
+      width: auto;
+      margin-top: 0;
+      min-width: 170px;
+    }
+
     /* â”€â”€ RESPONSIVE â”€â”€ */
     @media (max-width: 1100px) {
       .page {
@@ -574,6 +733,19 @@
       }
       .card {
         padding: 36px 24px 30px;
+      }
+
+      .modal-card {
+        padding: 24px 18px 20px;
+      }
+
+      .modal-actions {
+        flex-direction: column-reverse;
+      }
+
+      .modal-submit,
+      .btn-secondary {
+        width: 100%;
       }
     }
   

@@ -180,6 +180,66 @@ public class StudentService {
         return "Google signup completed!";
     }
 
+    // ===================== FORGOT PASSWORD =====================
+    public String verifyPasswordResetIdentity(String email, String identifier) {
+
+        if (email == null || email.trim().isEmpty()) {
+            return "Email is required!";
+        }
+
+        if (identifier == null || identifier.trim().isEmpty()) {
+            return "Username or full name is required!";
+        }
+
+        String normalizedEmail = email.toLowerCase().trim();
+        String normalizedIdentifier = identifier.trim().replaceAll("\\s+", " ").toLowerCase();
+
+        Optional<Student> optionalStudent = studentRepository.findByEmail(normalizedEmail);
+
+        if (optionalStudent.isEmpty()) {
+            return "User not found!";
+        }
+
+        Student student = optionalStudent.get();
+
+        String studentUsername = student.getUsername() == null ? "" : student.getUsername().trim().toLowerCase();
+        String studentName = student.getName() == null
+                ? ""
+                : student.getName().trim().replaceAll("\\s+", " ").toLowerCase();
+
+        boolean verified = studentUsername.equals(normalizedIdentifier)
+                || studentName.equals(normalizedIdentifier);
+
+        if (!verified) {
+            return "Verification failed! Username or full name does not match this email.";
+        }
+
+        return "Identity verified!";
+    }
+
+    public String resetPassword(String email, String identifier, String newPassword) {
+
+        String verifyResult = verifyPasswordResetIdentity(email, identifier);
+        if (!verifyResult.equals("Identity verified!")) {
+            return verifyResult;
+        }
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return "New password is required!";
+        }
+
+        if (newPassword.length() < 8) {
+            return "Password must be at least 8 characters";
+        }
+
+        Student student = studentRepository.findByEmail(email.toLowerCase().trim()).orElseThrow();
+
+        student.setPassword(newPassword);
+        studentRepository.save(student);
+
+        return "Password reset successful!";
+    }
+
     // ===================== GET PROFILE =====================
     public Optional<Student> getStudentByEmail(String email) {
 
@@ -205,6 +265,29 @@ public class StudentService {
         }
 
         Student student = optionalStudent.get();
+
+        if (updatedData.getName() != null && !updatedData.getName().trim().isEmpty()) {
+            student.setName(updatedData.getName().trim());
+        }
+
+        if (updatedData.getUsername() != null) {
+            String normalizedUsername = updatedData.getUsername().trim().toLowerCase();
+
+            if (normalizedUsername.isEmpty()) {
+                return "Username cannot be empty!";
+            }
+
+            if (normalizedUsername.length() < 3) {
+                return "Username must be at least 3 characters";
+            }
+
+            Optional<Student> existingByUsername = studentRepository.findByUsername(normalizedUsername);
+            if (existingByUsername.isPresent() && !existingByUsername.get().getId().equals(student.getId())) {
+                return "Username is already taken. Please choose another one.";
+            }
+
+            student.setUsername(normalizedUsername);
+        }
 
         student.setStudentClass(updatedData.getStudentClass());
         student.setSkills(updatedData.getSkills());

@@ -170,6 +170,20 @@
   const btnLogin      = document.getElementById('btn-login');
   const loginEmailErr = document.getElementById('login-email-err');
   const loginPwErr    = document.getElementById('login-password-err');
+  const forgotModalOverlay = document.getElementById('forgot-modal-overlay');
+  const forgotModalClose = document.getElementById('forgot-modal-close');
+  const forgotCancelBtn = document.getElementById('forgot-cancel-btn');
+  const forgotForm = document.getElementById('form-forgot-password');
+  const forgotEmail = document.getElementById('forgot-email');
+  const forgotIdentifier = document.getElementById('forgot-identifier');
+  const forgotSupportNote = document.getElementById('forgot-support-note');
+  const forgotPasswordField = document.getElementById('forgot-password-field');
+  const forgotConfirmField = document.getElementById('forgot-confirm-field');
+  const forgotNewPassword = document.getElementById('forgot-new-password');
+  const forgotConfirmPassword = document.getElementById('forgot-confirm-password');
+  const forgotSubmitBtn = document.getElementById('forgot-submit-btn');
+  const forgotFormErr = document.getElementById('forgot-form-err');
+  let forgotIdentityVerified = false;
 
   function updateLoginBtn() {
     // Allow username or email (at least 3 chars) and password (at least 8 chars)
@@ -432,23 +446,155 @@
   });
 
   // â”€â”€ FORGOT PASSWORD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  async function handleForgotPassword() {
-    const email = loginEmail.value.trim();
-    if (!email || !isValidEmail(email)) {
-      showError(loginEmailErr, 'Enter your email above first');
-      loginEmail.focus();
+  function showForgotError(message) {
+    forgotFormErr.querySelector('span').textContent = message;
+    forgotFormErr.classList.add('visible');
+  }
+
+  function clearForgotError() {
+    forgotFormErr.querySelector('span').textContent = '';
+    forgotFormErr.classList.remove('visible');
+  }
+
+  function openForgotPasswordModal() {
+    clearForgotError();
+    forgotForm.reset();
+    forgotIdentityVerified = false;
+    forgotPasswordField.classList.add('hidden');
+    forgotConfirmField.classList.add('hidden');
+    forgotSupportNote.classList.remove('hidden');
+    forgotSubmitBtn.querySelector('.btn-text').textContent = 'Verify account';
+    const prefillEmail = loginEmail.value.trim();
+    if (isValidEmail(prefillEmail)) {
+      forgotEmail.value = prefillEmail;
+    }
+    forgotModalOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+      if (forgotEmail.value) forgotIdentifier.focus();
+      else forgotEmail.focus();
+    }, 0);
+  }
+
+  function closeForgotPasswordModal() {
+    forgotModalOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+    clearForgotError();
+    forgotSubmitBtn.classList.remove('loading');
+    forgotSubmitBtn.disabled = false;
+  }
+
+  function handleForgotPassword() {
+    clearError(loginEmailErr);
+    openForgotPasswordModal();
+  }
+
+  forgotModalClose.addEventListener('click', closeForgotPasswordModal);
+  forgotCancelBtn.addEventListener('click', closeForgotPasswordModal);
+  forgotModalOverlay.addEventListener('click', (event) => {
+    if (event.target === forgotModalOverlay) {
+      closeForgotPasswordModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !forgotModalOverlay.classList.contains('hidden')) {
+      closeForgotPasswordModal();
+    }
+  });
+
+  forgotForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = forgotEmail.value.trim();
+    const identifier = forgotIdentifier.value.trim();
+    const newPassword = forgotNewPassword.value;
+    const confirmPassword = forgotConfirmPassword.value;
+
+    clearForgotError();
+
+    if (!isValidEmail(email)) {
+      showForgotError('Enter your registered email address.');
+      forgotEmail.focus();
       return;
     }
-    clearError(loginEmailErr);
-    try {
-      const response = await fetch(`${API_BASE}/profile?email=${encodeURIComponent(email)}`);
-      if (response.status === 404) { showError(loginEmailErr, 'No account found for this email'); return; }
-      if (!response.ok) { alert('Password reset unavailable. Please contact support.'); return; }
-      alert('Account found. Password reset is not yet implemented in the backend.');
-    } catch {
-      alert('Could not connect to server.');
+
+    if (!identifier) {
+      showForgotError('Enter your username or full name.');
+      forgotIdentifier.focus();
+      return;
     }
-  }
+
+    if (forgotIdentityVerified) {
+      if (newPassword.length < 8) {
+        showForgotError('New password must be at least 8 characters.');
+        forgotNewPassword.focus();
+        return;
+      }
+
+      if (confirmPassword !== newPassword) {
+        showForgotError('Passwords do not match.');
+        forgotConfirmPassword.focus();
+        return;
+      }
+    }
+
+    forgotSubmitBtn.classList.add('loading');
+    forgotSubmitBtn.disabled = true;
+
+    try {
+      const endpoint = forgotIdentityVerified ? `${API_BASE}/forgot-password` : `${API_BASE}/forgot-password/verify`;
+      const payload = forgotIdentityVerified
+        ? { email, identifier, newPassword }
+        : { email, identifier };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await parseApiResponse(response);
+      const message = (typeof result === 'string' && result.trim())
+        ? result
+        : (response.ok
+            ? (forgotIdentityVerified ? 'Password reset successful!' : 'Identity verified!')
+            : 'Request failed.');
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          showForgotError('No account found for this email.');
+        } else if (response.status === 401) {
+          showForgotError('Verification failed. Username or full name does not match this email.');
+        } else {
+          showForgotError(message);
+        }
+        return;
+      }
+
+      if (!forgotIdentityVerified) {
+        forgotIdentityVerified = true;
+        forgotPasswordField.classList.remove('hidden');
+        forgotConfirmField.classList.remove('hidden');
+        forgotSupportNote.classList.add('hidden');
+        forgotSubmitBtn.querySelector('.btn-text').textContent = 'Reset password';
+        forgotNewPassword.focus();
+        return;
+      }
+
+      closeForgotPasswordModal();
+      loginEmail.value = email;
+      loginPassword.value = '';
+      updateLoginBtn();
+      alert(message);
+      loginPassword.focus();
+    } catch {
+      showForgotError('Could not connect to server.');
+    } finally {
+      forgotSubmitBtn.classList.remove('loading');
+      forgotSubmitBtn.disabled = false;
+    }
+  });
 
   applyOAuthReturnState();
 
