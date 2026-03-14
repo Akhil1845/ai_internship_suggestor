@@ -41,7 +41,7 @@
   --r-shadow: none;
 }
 
-[data-dark="true"] {
+[data-theme="dark"] {
   --bg: #010409;
   --surface: #0d1117;
   --border: #21262d;
@@ -66,15 +66,16 @@ body {
 .topbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   height: 52px;
-  background: var(--sidebar-bg);
+  background: var(--surface);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px;
-  border-bottom: 1px solid var(--sidebar-border);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--tr), border-color var(--tr);
 }
 .topbar-logo {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px; font-weight: 800;
-  color: #e6edf3; letter-spacing: -0.5px;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 28px; font-weight: bold;
+  color: var(--text); letter-spacing: -0.5px;
   display: flex; align-items: center; gap: 8px;
 }
 .topbar-logo .logo-icon {
@@ -84,7 +85,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 14px;
 }
-.topbar-logo span { color: #79c0ff; }
+.topbar-logo span { color: #ff8c05; }
 .topbar-center {
   position: absolute; left: 50%; transform: translateX(-50%);
   display: flex; gap: 4px;
@@ -101,10 +102,11 @@ body {
 }
 .btn:active { transform: scale(0.97); }
 .btn-ghost {
-  background: transparent; color: var(--sidebar-text);
-  border: 1px solid var(--sidebar-border);
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
 }
-.btn-ghost:hover { background: var(--sidebar-surface); border-color: #444c56; }
+.btn-ghost:hover { background: rgba(0,0,0,0.06); }
+[data-theme="dark"] .btn-ghost:hover { background: var(--sidebar-surface); border-color: #444c56; }
 .btn-primary { background: #1f6feb; color: #fff; }
 .btn-primary:hover { background: #388bfd; }
 .btn-success { background: #238636; color: #fff; }
@@ -278,7 +280,7 @@ body {
   display: flex; justify-content: center; align-items: flex-start;
   transition: background var(--tr);
 }
-[data-dark="true"] .main-area { background: #010409; }
+[data-theme="dark"] .main-area { background: #010409; }
 
 .resume-scale-wrap {
   transform-origin: top center;

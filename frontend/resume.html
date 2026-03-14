@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ResumeForge — Professional Resume Builder</title>
+<title>Build Resume — CareerPilot</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@400;600;700&family=Space+Mono:wght@400;700&family=Crimson+Pro:wght@300;400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="stylesheet" href="resume.css">
@@ -13,13 +13,12 @@
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-logo">
-    <div class="logo-icon">📄</div>
-    Resume<span>Forge</span>
+    Career<span>Pilot</span>
   </div>
   <div class="topbar-actions">
     <button class="btn btn-ghost" onclick="location.href='dashboard.html'" title="Back to Dashboard">← Dashboard</button>
     <button class="btn btn-ghost" onclick="location.href='templates.html'" title="Choose template">🎨 Templates</button>
-    <button class="btn btn-ghost" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+    <button class="btn btn-ghost" id="themeToggle" onclick="toggleDark()" title="Toggle theme">🌙</button>
     <button class="btn btn-ghost" onclick="saveResume()">💾 Save</button>
     <button class="btn btn-outline" onclick="clearStorage()">↺ Reset</button>
     <button class="btn btn-success" onclick="printResume()">🖨 Print</button>
@@ -731,12 +730,21 @@ function switchTab(panel,el) {
 }
 
 /* ════════════════════════════════════════
-   DARK MODE
+   THEME
 ════════════════════════════════════════ */
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+}
 function toggleDark() {
-  const on = document.body.getAttribute('data-dark')==='true';
-  document.body.setAttribute('data-dark', !on);
-  localStorage.setItem('rf_dark', !on);
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
 /* ════════════════════════════════════════
@@ -782,7 +790,7 @@ function loadResume() {
   } catch(e) {
     console.error('Error loading resume:', e);
   }
-  if (localStorage.getItem('rf_dark')==='true') document.body.setAttribute('data-dark','true');
+  initTheme();
 }
 function clearStorage() {
   if (!confirm('Reset to default data?')) return;

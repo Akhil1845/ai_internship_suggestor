@@ -1,89 +1,103 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ResumeForge — Templates</title>
+<title>Templates — CareerPilot</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-	--bg: #010409;
-	--surface: #0d1117;
-	--surface-2: #161b22;
-	--border: #21262d;
-	--text: #e6edf3;
-	--muted: #8b949e;
-	--accent: #388bfd;
+	--primary-orange: #ff8c05;
+	--primary-yellow: #ffbb33;
+	--text-dark: #1e293b;
+	--text-muted: #64748b;
+	--bg-page: linear-gradient(180deg, #ffffff, #f0f9ff);
+	--navbar-bg: #ffffff;
+	--border-color: #e2e8f0;
+	--surface-2: #f0f9ff;
+}
+[data-theme="dark"] {
+	--text-dark: #f1f5f9;
+	--text-muted: #94a3b8;
+	--bg-page: linear-gradient(180deg, #1e293b, #0f172a);
+	--navbar-bg: #1e293b;
+	--border-color: #334155;
+	--surface-2: #243044;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
 	font-family: 'DM Sans', sans-serif;
-	background: var(--bg);
-	color: var(--text);
+	background: var(--bg-page);
+	color: var(--text-dark);
 	min-height: 100vh;
+	transition: background .3s, color .3s;
 }
 .topbar {
-	height: 56px;
-	border-bottom: 1px solid var(--border);
-	background: var(--surface);
+	height: 70px;
+	border-bottom: 1px solid var(--border-color);
+	background: var(--navbar-bg);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 16px;
+	padding: 0 40px;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+	transition: background .3s;
 }
-.logo {
-	font-family: 'Syne', sans-serif;
-	font-size: 18px;
-	font-weight: 800;
-	display: flex;
-	align-items: center;
-	gap: 8px;
+.nav-brand {
+	font-size: 28px;
+	font-weight: bold;
+	color: var(--text-dark);
+	font-family: 'Segoe UI', sans-serif;
 }
-.logo-icon {
-	width: 28px;
-	height: 28px;
-	border-radius: 6px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: linear-gradient(135deg, #2563eb, #7c3aed);
-}
-.logo span { color: #79c0ff; }
-.btn {
-	border: 1px solid var(--border);
-	background: transparent;
-	color: var(--text);
-	padding: 7px 12px;
-	border-radius: 6px;
-	font-size: 12px;
+.nav-brand .gold-text { color: var(--primary-orange); }
+.nav-btn {
+	padding: 9px 18px;
+	border: none;
+	border-radius: 8px;
+	font-family: 'DM Sans', sans-serif;
+	font-size: 14px;
 	font-weight: 600;
 	cursor: pointer;
+	background: linear-gradient(90deg, var(--primary-orange), var(--primary-yellow));
+	color: #fff;
+	transition: transform .15s, box-shadow .15s;
 }
-.btn:hover { background: var(--surface-2); }
-
+.nav-btn:hover { transform: scale(1.04); box-shadow: 0 4px 14px rgba(255,140,5,.35); }
+.theme-toggle-btn {
+	background: transparent;
+	border: 1.5px solid var(--border-color);
+	color: var(--text-dark);
+	padding: 8px 12px;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+	border-radius: 8px;
+	transition: border-color .2s;
+}
+.theme-toggle-btn:hover { border-color: var(--primary-orange); }
 .wrap {
 	max-width: 1100px;
 	margin: 0 auto;
-	padding: 24px 18px 28px;
+	padding: 32px 18px 40px;
 }
 .title {
-	font-size: 22px;
+	font-size: 26px;
 	font-weight: 800;
-	margin-bottom: 6px;
+	margin-bottom: 8px;
+	color: var(--text-dark);
 }
 .sub {
-	color: var(--muted);
-	font-size: 13px;
-	margin-bottom: 16px;
+	color: var(--text-muted);
+	font-size: 14px;
+	margin-bottom: 20px;
 }
-
 .tpl-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 	gap: 12px;
 }
 .tpl-card {
-	border: 2px solid var(--border);
+	border: 2px solid var(--border-color);
 	border-radius: 10px;
 	overflow: hidden;
 	background: #ffffff;
@@ -91,13 +105,13 @@ body {
 	transition: all 0.15s ease;
 }
 .tpl-card:hover {
-	border-color: var(--accent);
+	border-color: var(--primary-orange);
 	transform: translateY(-2px);
-	box-shadow: 0 8px 18px rgba(56, 139, 253, 0.25);
+	box-shadow: 0 8px 18px rgba(255,140,5,.25);
 }
 .tpl-card.active {
-	border-color: var(--accent);
-	box-shadow: 0 0 0 2px rgba(56, 139, 253, 0.35);
+	border-color: var(--primary-orange);
+	box-shadow: 0 0 0 2px rgba(255,140,5,.35);
 }
 .tpl-preview {
 	aspect-ratio: 0.707;
@@ -106,37 +120,30 @@ body {
 .tpl-preview svg { width: 100%; height: 100%; display: block; }
 .tpl-name {
 	background: var(--surface-2);
-	color: var(--text);
+	color: var(--text-dark);
 	font-size: 11px;
 	font-weight: 700;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
 	text-align: center;
 	padding: 10px 8px;
+	border-top: 1px solid var(--border-color);
+	transition: background .3s, color .3s;
 }
 .actions {
-	margin-top: 16px;
+	margin-top: 20px;
 	display: flex;
 	justify-content: flex-end;
 }
-.btn-primary {
-	border: none;
-	background: #1f6feb;
-	color: #fff;
-	padding: 9px 14px;
-}
-.btn-primary:hover { background: #388bfd; }
 </style>
 </head>
 <body>
 	<div class="topbar">
-		<div class="logo">
-			<div class="logo-icon">📄</div>
-			Resume<span>Forge</span>
-		</div>
-		<div style="display:flex;gap:10px;">
-			<button class="btn" onclick="location.href='dashboard.html'">← Dashboard</button>
-			<button class="btn" onclick="location.href='resume.html'">← Back to Resume</button>
+		<div class="nav-brand">Career<span class="gold-text">Pilot</span></div>
+		<div style="display:flex;gap:10px;align-items:center;">
+			<button class="nav-btn" onclick="location.href='dashboard.html'">← Dashboard</button>
+			<button class="nav-btn" onclick="location.href='resume.html'">← Back to Resume</button>
+			<button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙</button>
 		</div>
 	</div>
 
@@ -145,7 +152,7 @@ body {
 		<div class="sub">Select one template layout. It will be saved and applied in the resume editor.</div>
 		<div class="tpl-grid" id="tpl-grid"></div>
 		<div class="actions">
-			<button class="btn btn-primary" onclick="openResume()">Use Template</button>
+			<button class="nav-btn" onclick="openResume()">Use Template →</button>
 		</div>
 	</div>
 
@@ -335,7 +342,23 @@ function init() {
 	buildTplGrid();
 }
 
+function initTheme() {
+	const saved = localStorage.getItem('theme') || 'light';
+	document.documentElement.setAttribute('data-theme', saved);
+	const btn = document.getElementById('themeToggle');
+	if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+	const current = document.documentElement.getAttribute('data-theme') || 'light';
+	const next = current === 'dark' ? 'light' : 'dark';
+	document.documentElement.setAttribute('data-theme', next);
+	localStorage.setItem('theme', next);
+	const btn = document.getElementById('themeToggle');
+	if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
 init();
+initTheme();
 </script>
 </body>
 </html>
