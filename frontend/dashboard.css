@@ -668,10 +668,10 @@ input[type="file"] {
 }
 
 .project-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 14px;
-    background: #fbfdff;
+    background: var(--bg-card);
     display: flex;
     flex-direction: column;
     gap: 8px;
