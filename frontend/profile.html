@@ -1327,6 +1327,9 @@ renderProjects([]);
 resetProjectForm();
 initTheme();
 
+Promise.all([loadProfile(), loadSocialProfiles(), loadProjects()]).then(() => {
+    initAnimations();
+});
 </script>
 
 </body>
