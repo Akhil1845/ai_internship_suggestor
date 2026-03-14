@@ -46,13 +46,13 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-.project-title {
+.nav-brand {
     font-size: 42px;
     font-weight: bold;
     color: var(--text-dark);
 }
 
-.project-title .gold-text {
+.nav-brand .gold-text {
     color: var(--primary-orange);
 }
 
