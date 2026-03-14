@@ -119,8 +119,10 @@
             width: 100%;
             padding: 12px;
             border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text-dark);
         }
 
         .save-btn {
@@ -182,7 +184,7 @@
         }
 
         .profile-card:hover {
-            background: #e0f2ff;
+            background: var(--sub-bg);
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.08);
         }
@@ -321,12 +323,14 @@
             width: 100%;
             min-height: 90px;
             padding: 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
             box-sizing: border-box;
             resize: vertical;
             font-family: 'Segoe UI', sans-serif;
+            background: var(--input-bg);
+            color: var(--text-dark);
         }
 
         .project-form-actions {
@@ -401,7 +405,7 @@
         .project-entry-desc {
             margin: 10px 0;
             font-size: 13px;
-            color: #475569;
+            color: var(--text-gray);
             line-height: 1.45;
         }
 
@@ -914,10 +918,12 @@ function openAddProfileModal(platformKey) {
     urlInput.style.cssText = `
         width: 100%;
         padding: 12px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid ${getComputedStyle(document.documentElement).getPropertyValue('--border-color') || '#e2e8f0'};
         border-radius: 8px;
         font-size: 14px;
         box-sizing: border-box;
+        background: ${getComputedStyle(document.documentElement).getPropertyValue('--input-bg') || '#fff'};
+        color: ${getComputedStyle(document.documentElement).getPropertyValue('--text-dark') || '#1e293b'};
     `;
 
     urlGroup.appendChild(urlLabel);
