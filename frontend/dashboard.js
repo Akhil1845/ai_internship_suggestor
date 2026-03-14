@@ -22,12 +22,6 @@ function updateResumeText() {
         file ? file.name : "Choose Resume";
 }
 
-function updateCertificateText() {
-    const file = document.getElementById("certificateFile").files[0];
-    document.getElementById("certificateText").innerText =
-        file ? file.name : "Choose Certificate";
-}
-
 function resetResumeRecommendationsUI() {
     const matchedSection = document.getElementById("matchedInternshipsSection");
     const matchedContainer = document.getElementById("matchedInternshipsContainer");
@@ -397,157 +391,9 @@ function renderMatchedInternships(internships) {
     container.innerHTML = `<div class="matched-internships-grid">${html}</div>`;
 }
 
-async function uploadCertificate() {
-    const fileInput = document.getElementById("certificateFile");
-    const uploadButton = document.querySelector("button[onclick='uploadCertificate()']");
-    const file = fileInput?.files?.[0];
-
-    if (!file) {
-        alert("Please choose your certificate first.");
-        return;
-    }
-
-    if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
-        alert('Only PDF files are accepted.');
-        return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-        alert('File exceeds 10 MB limit.');
-        return;
-    }
-
-    if (uploadButton) {
-        uploadButton.disabled = true;
-        uploadButton.innerText = "Verifying...";
-    }
-
-    // Show the certificate results section
-    const resultsSection = document.getElementById("certificateResultsSection");
-    if (resultsSection) {
-        resultsSection.classList.remove("show");
-    }
-
-    try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch("http://localhost:8089/api/verify/certificate", {
-            method: "POST",
-            body: formData
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        renderCertificateResult(data);
-        
-        // Show and scroll to results
-        if (resultsSection) {
-            resultsSection.classList.add("show");
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    } catch (error) {
-        console.error("Certificate verification error:", error);
-        alert("Could not reach the backend. Is Spring Boot running on port 8089?");
-    } finally {
-        if (uploadButton) {
-            uploadButton.disabled = false;
-            uploadButton.innerText = "Upload Certificate";
-        }
-    }
-}
-
-function renderCertificateResult(d) {
-    // Verdict banner
-    const banner = document.getElementById('verdictBanner');
-    banner.className = 'verdict-banner ' + (d.authentic ? 'authentic' : 'fake');
-    document.getElementById('verdictIcon').textContent = d.authentic ? '🛡️' : '⚠️';
-    document.getElementById('verdictTitle').textContent = d.verdict || (d.authentic ? 'Authentic Certificate' : 'Unverified Certificate');
-    document.getElementById('verdictExpl').textContent = d.explanation || '';
-
-    // Confidence
-    const score = d.confidenceScore ?? 0;
-    document.getElementById('confVal').textContent = `${score}/100`;
-    const fill = document.getElementById('confFill');
-    fill.className = 'confidence-fill ' + (score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low');
-    setTimeout(() => fill.style.width = score + '%', 100);
-
-    // Info grid
-    const fields = [
-        { label: 'Certificate Type', value: d.certificateType, mono: false },
-        { label: 'Candidate Name', value: d.candidateName, mono: false },
-        { label: 'Credential ID', value: d.credentialId, mono: true },
-        { label: 'Exam / Course', value: d.examTitle, mono: false },
-        { label: 'Issued Date', value: d.issueDate, mono: false },
-        { label: 'Expiry Date', value: d.expiryDate, mono: false },
-        { label: 'Issuing Org', value: d.issuingOrg, mono: false },
-        { label: 'Authorized Signatory', value: d.authorizedSignatory, mono: false },
-        { label: 'Verification URL', value: d.verificationUrl, mono: true },
-    ];
-    const grid = document.getElementById('infoGrid');
-    grid.innerHTML = fields.map(f => `
-        <div class="info-cell">
-            <div class="info-cell-label">${f.label}</div>
-            <div class="info-cell-value ${f.value ? (f.mono ? 'mono' : '') : 'empty'}">
-                ${escapeHtml(f.value) || 'Not detected'}
-            </div>
-        </div>`).join('');
-
-    // Checks
-    const passed = d.passedChecks || [];
-    const failed = d.failedChecks || [];
-    document.getElementById('passedList').innerHTML = passed.length
-        ? passed.map((c, i) => checkHtml(c, i)).join('')
-        : '<div class="check-item" style="color:var(--text-gray);font-size:11px;">No checks passed</div>';
-    document.getElementById('failedList').innerHTML = failed.length
-        ? failed.map((c, i) => checkHtml(c, i)).join('')
-        : '<div class="check-item" style="color:var(--text-gray);font-size:11px;">No failures detected</div>';
-
-    // Raw text
-    document.getElementById('rawText').textContent = d.extractedText || '(no text extracted)';
-}
-
-function checkHtml(c, i) {
-    return `<div class="check-item" style="animation-delay:${i * 0.05}s">
-        <div class="check-dot"></div>
-        <div>
-            <div class="check-label">${escapeHtml(c.label)}</div>
-            ${c.detail ? `<div class="check-detail">${escapeHtml(c.detail)}</div>` : ''}
-        </div>
-    </div>`;
-}
-
 // Raw text toggle handler
 document.addEventListener('DOMContentLoaded', function() {
     resetResumeRecommendationsUI();
-
-    const rawToggle = document.getElementById('rawToggle');
-    if (rawToggle) {
-        rawToggle.addEventListener('click', function() {
-            const raw = document.getElementById('rawText');
-            raw.classList.toggle('show');
-            this.querySelector('span').textContent = raw.classList.contains('show') ? '▾' : '▸';
-            this.childNodes[1].textContent = raw.classList.contains('show') ? ' Hide extracted text' : ' View extracted text';
-        });
-    }
-
-    const resetBtn = document.getElementById('resetBtn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            const certificateFile = document.getElementById('certificateFile');
-            const certificateText = document.getElementById('certificateText');
-            const resultsSection = document.getElementById('certificateResultsSection');
-            
-            if (certificateFile) certificateFile.value = '';
-            if (certificateText) certificateText.textContent = 'Choose Certificate';
-            if (resultsSection) resultsSection.classList.remove('show');
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
 });
 
 /* WELCOME ANIMATION */
@@ -639,6 +485,7 @@ function animateCards() {
 
 // Store social profiles in memory
 let socialProfiles = [];
+let studentProjects = [];
 let barChartInstance;
 let lineChartInstance;
 
@@ -1108,6 +955,69 @@ function openProfileInBrowser(platformKey) {
     window.open(url, "_blank", "noopener,noreferrer");
 }
 
+function openProjectLink(url) {
+    if (!url) {
+        return;
+    }
+
+    let resolved = url;
+    try {
+        resolved = decodeURIComponent(url);
+    } catch (e) {
+        resolved = url;
+    }
+
+    window.open(resolved, "_blank", "noopener,noreferrer");
+}
+
+function renderProjects(projects) {
+    const container = document.getElementById("projectsContainer");
+    if (!container) {
+        return;
+    }
+
+    if (!Array.isArray(projects) || projects.length === 0) {
+        container.innerHTML = '<div class="no-projects-msg">No projects added yet. Add your deployed links in Profile.</div>';
+        return;
+    }
+
+    const sorted = [...projects]
+        .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
+        .slice(0, 6);
+
+    container.innerHTML = `<div class="projects-grid">${sorted.map((project) => {
+        const title = escapeHtml(project.title || "Untitled Project");
+        const deployed = project.deployedLink || "";
+        const github = project.githubLink || "";
+        const encodedDeployed = deployed ? encodeURIComponent(deployed) : "";
+        const encodedGithub = github ? encodeURIComponent(github) : "";
+        const techStack = escapeHtml(project.techStack || "Tech stack not specified");
+        const description = escapeHtml(project.description || "No description provided yet.");
+        const featuredBadge = project.featured
+            ? '<span class="project-featured">Featured</span>'
+            : '';
+
+        return `
+            <div class="project-card">
+                <div class="project-top">
+                    <div class="project-title-wrap">
+                        <h3 class="project-title">${title}</h3>
+                        ${featuredBadge}
+                    </div>
+                </div>
+
+                <div class="project-tech">${techStack}</div>
+                <p class="project-description">${description}</p>
+
+                <div class="project-actions">
+                    <button class="project-btn" ${deployed ? `onclick="openProjectLink('${encodedDeployed}')"` : "disabled"}>Live Demo</button>
+                    <button class="project-btn secondary" ${github ? `onclick="openProjectLink('${encodedGithub}')"` : "disabled"}>GitHub</button>
+                </div>
+            </div>
+        `;
+    }).join("")}</div>`;
+}
+
 function displayAddedProfiles() {
     const container = document.getElementById('profilesContainer');
     
@@ -1162,6 +1072,234 @@ async function loadSocialProfiles() {
     }
 }
 
+async function loadProjects() {
+    try {
+        const response = await fetch(`http://localhost:8089/api/students/projects?email=${encodeURIComponent(userEmail)}`);
+        if (!response.ok) {
+            studentProjects = [];
+            renderProjects([]);
+            return;
+        }
+
+        const data = await response.json();
+        studentProjects = Array.isArray(data) ? data : [];
+        renderProjects(studentProjects);
+    } catch (error) {
+        console.error("Error loading projects:", error);
+        studentProjects = [];
+        renderProjects([]);
+    }
+}
+
+/* ================= GLOBAL CONTESTS ================= */
+
+const CONTEST_PLATFORMS = ["CODECHEF", "LEETCODE", "CODEFORCES"];
+
+// Call kontests.net directly from the browser (public CORS-enabled API)
+const CONTEST_API_URLS = {
+    CODECHEF:   "https://kontests.net/api/v1/code_chef",
+    LEETCODE:   "https://kontests.net/api/v1/leet_code",
+    CODEFORCES: "https://kontests.net/api/v1/codeforces"
+};
+
+// Direct links shown when APIs are unavailable
+const PLATFORM_FALLBACK_URLS = {
+    CODECHEF:   "https://www.codechef.com/contests",
+    LEETCODE:   "https://leetcode.com/contest/",
+    CODEFORCES: "https://codeforces.com/contests"
+};
+
+/**
+ * Fetch contests via the backend (avoids CORS). Backend tries kontests.net
+ * first, then falls back to each platform's own API.
+ * Returns array of contests or null on failure.
+ */
+async function fetchPlatformContests(platform) {
+    try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 15000);
+        const res = await fetch(
+            `http://localhost:8089/api/contests?platform=${encodeURIComponent(platform)}`,
+            { signal: ctrl.signal }
+        );
+        clearTimeout(tid);
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) return data;
+        }
+    } catch (e) { /* backend offline */ }
+    return null;
+}
+
+function formatContestTime(isoString) {
+    if (!isoString) return "Time TBD";
+    try {
+        const d = new Date(isoString);
+        return d.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+    } catch (e) {
+        return isoString;
+    }
+}
+
+function getContestBadge(isoStart) {
+    if (!isoStart) return "";
+    try {
+        const diff = new Date(isoStart) - Date.now();
+        const hours = diff / 3600000;
+        if (hours < 0)  return "";
+        if (hours < 3)  return '<span class="contest-badge badge-soon">Starting very soon</span>';
+        if (hours < 24) return '<span class="contest-badge badge-starting">Today</span>';
+        return '<span class="contest-badge badge-upcoming">Upcoming</span>';
+    } catch (e) {
+        return "";
+    }
+}
+
+function renderContestList(platform, contests) {
+    const listEl = document.getElementById(`contestList-${platform}`);
+    const statusEl = document.getElementById(`contestStatus-${platform}`);
+    if (!listEl) return;
+
+    if (!Array.isArray(contests) || contests.length === 0) {
+        listEl.innerHTML = '<div class="no-contests-msg">No upcoming contests found.</div>';
+        if (statusEl) statusEl.textContent = "No upcoming contests";
+        return;
+    }
+
+    const upcoming = contests
+        .filter(c => {
+            if (!c.start_time) return true;
+            return new Date(c.start_time) > new Date(Date.now() - 3600000 * 2);
+        })
+        .slice(0, 5);
+
+    if (statusEl) statusEl.textContent = `${upcoming.length} upcoming contest${upcoming.length !== 1 ? "s" : ""}`;
+
+    listEl.innerHTML = upcoming.map(c => {
+        const name = escapeHtml(c.name || "Contest");
+        const start = formatContestTime(c.start_time);
+        const end = formatContestTime(c.end_time);
+        const badge = getContestBadge(c.start_time);
+        const url = escapeHtml(c.url || "#");
+        return `
+            <div class="contest-item">
+                <div class="contest-item-name">${name}</div>
+                <div class="contest-item-time">Start: ${start}</div>
+                <div class="contest-item-time">End: ${end}</div>
+                <div class="contest-item-badges">${badge}</div>
+                <a class="contest-item-link" href="${url}" target="_blank" rel="noopener noreferrer">View Contest →</a>
+            </div>
+        `;
+    }).join("");
+}
+
+function applyToggleUI(platform, enabled) {
+    const labelEl = document.getElementById(`toggleLabel-${platform}`);
+    const toggleEl = document.getElementById(`toggle-${platform}`);
+    if (labelEl) {
+        labelEl.textContent = enabled ? "Notifications On" : "Notifications Off";
+        labelEl.className = "contest-toggle-label" + (enabled ? " on" : "");
+    }
+    if (toggleEl) toggleEl.checked = enabled;
+}
+
+function checkAndNotify(platform, contests) {
+    if (!contests || contests.length === 0) return;
+    if (Notification.permission !== "granted") return;
+
+    const soon = contests.find(c => {
+        if (!c.start_time) return false;
+        const diff = new Date(c.start_time) - Date.now();
+        return diff > 0 && diff < 3600000 * 24;
+    });
+
+    if (soon) {
+        new Notification(`🏆 ${platform} contest starting soon!`, {
+            body: `${soon.name}\nStarts: ${formatContestTime(soon.start_time)}`,
+            icon: "https://cp-logo.vercel.app/codeforces"
+        });
+    }
+}
+
+async function toggleContestNotification(platform, enabled) {
+    applyToggleUI(platform, enabled);
+
+    try {
+        await fetch(
+            `http://localhost:8089/api/contests/preferences?email=${encodeURIComponent(userEmail)}&platform=${encodeURIComponent(platform)}&enabled=${enabled}`,
+            { method: "PUT" }
+        );
+    } catch (e) {
+        console.error("Failed to save contest preference:", e);
+    }
+
+    if (enabled) {
+        if (Notification.permission === "default") {
+            const perm = await Notification.requestPermission();
+            if (perm === "granted") {
+                try {
+                    const contests = await fetchPlatformContests(platform);
+                    if (contests) checkAndNotify(platform, contests);
+                } catch (e) { /* ignore */ }
+            }
+        } else if (Notification.permission === "granted") {
+            try {
+                const contests = await fetchPlatformContests(platform);
+                if (contests) checkAndNotify(platform, contests);
+            } catch (e) { /* ignore */ }
+        }
+    }
+}
+
+async function loadContests() {
+    // Load saved preferences (5s timeout — backend is optional)
+    let prefs = { CODECHEF: false, LEETCODE: false, CODEFORCES: false };
+    try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 5000);
+        const res = await fetch(
+            `http://localhost:8089/api/contests/preferences?email=${encodeURIComponent(userEmail)}`,
+            { signal: ctrl.signal }
+        );
+        clearTimeout(tid);
+        if (res.ok) prefs = await res.json();
+    } catch (e) { /* backend offline — use defaults */ }
+
+    for (const platform of CONTEST_PLATFORMS) {
+        applyToggleUI(platform, prefs[platform] === true);
+    }
+
+    for (const platform of CONTEST_PLATFORMS) {
+        const listEl  = document.getElementById(`contestList-${platform}`);
+        const statusEl = document.getElementById(`contestStatus-${platform}`);
+        try {
+            const contests = await fetchPlatformContests(platform);
+            if (contests && contests.length > 0) {
+                renderContestList(platform, contests);
+                if (prefs[platform] === true && Notification.permission === "granted") {
+                    checkAndNotify(platform, contests);
+                }
+            } else {
+                // Both sources failed — show a direct link so user can still check
+                const platformName = platform.charAt(0) + platform.slice(1).toLowerCase();
+                const link = PLATFORM_FALLBACK_URLS[platform];
+                if (listEl) listEl.innerHTML = `
+                    <div class="no-contests-msg">
+                        Live data temporarily unavailable.<br>
+                        <a href="${link}" target="_blank" rel="noopener noreferrer"
+                           style="color:var(--primary-orange);font-weight:700;text-decoration:none;">
+                            View contests on ${platformName} &rarr;
+                        </a>
+                    </div>`;
+                if (statusEl) statusEl.textContent = "Visit platform";
+            }
+        } catch (e) {
+            if (listEl) listEl.innerHTML = '<div class="no-contests-msg">Failed to load contests.</div>';
+            if (statusEl) statusEl.textContent = "Error";
+        }
+    }
+}
+
 async function loadUser() {
     try {
         const response = await fetch(
@@ -1176,12 +1314,18 @@ async function loadUser() {
             animateWelcome("User");
         }
 
+        if (data && data.id != null) {
+            localStorage.setItem("studentId", String(data.id));
+        }
+
     } catch (error) {
         animateWelcome("User");
     }
 
     // Load social profiles after user loads
     loadSocialProfiles();
+    loadProjects();
+    loadContests();
 }
 
 loadUser();

@@ -19,6 +19,7 @@ if (!userEmail) window.location.href = "user_login.html";
     <div class="project-title"><span class="gold-text">AI</span> Internship Platform</div>
     <div class="nav-right">
         <button onclick="buildResume()">Build Resume</button>
+        <button onclick="window.location.href='internship-prep.html'">Internship Prep</button>
         <button onclick="goProfile()">Profile</button>
         <button onclick="logout()">Logout</button>
     </div>
@@ -47,17 +48,6 @@ if (!userEmail) window.location.href = "user_login.html";
             <button onclick="uploadResume()">Upload & Get Internships</button>
         </div>
 
-        <div class="card">
-            <h3>Certificate Verification</h3>
-
-            <label class="custom-file">
-                <span id="certificateText">Choose Certificate</span>
-                <input type="file" id="certificateFile" onchange="updateCertificateText()">
-            </label>
-
-            <button onclick="uploadCertificate()">Upload Certificate</button>
-        </div>
-
     </div>
 </div>
 
@@ -68,58 +58,99 @@ if (!userEmail) window.location.href = "user_login.html";
     </div>
 </div>
 
-<!-- CERTIFICATE VERIFICATION RESULTS -->
-<div class="certificate-results-section" id="certificateResultsSection">
-    <h2>Certificate Verification Results</h2>
-    
-    <div id="certificateResultPanel" class="certificate-result-panel">
-        
-        <div class="verdict-banner" id="verdictBanner">
-            <div class="verdict-icon" id="verdictIcon"></div>
-            <div class="verdict-text">
-                <div class="verdict-title" id="verdictTitle"></div>
-                <div class="verdict-explanation" id="verdictExpl"></div>
-            </div>
-        </div>
-
-        <div class="confidence-wrap">
-            <div class="confidence-label">
-                <span>Confidence Score</span>
-                <span class="confidence-val" id="confVal">—</span>
-            </div>
-            <div class="confidence-track">
-                <div class="confidence-fill" id="confFill"></div>
-            </div>
-        </div>
-
-        <div class="info-grid" id="infoGrid"></div>
-
-        <div class="checks-row">
-            <div class="checks-box pass">
-                <div class="checks-box-title">✓ Passed Checks</div>
-                <div id="passedList"></div>
-            </div>
-            <div class="checks-box fail">
-                <div class="checks-box-title">✗ Failed Checks</div>
-                <div id="failedList"></div>
-            </div>
-        </div>
-
-        <button class="raw-toggle" id="rawToggle">
-            <span>▸</span> View extracted text
-        </button>
-        <pre class="raw-text" id="rawText"></pre>
-
-        <button class="btn-reset" id="resetBtn">↩ Verify another certificate</button>
-    </div>
-</div>
-
 <!-- SOCIAL PROFILES SECTION -->
 <div class="social-section" id="socialSection">
     <h2>Social Profile</h2>
     
     <div id="profilesContainer">
         <div class="no-profiles-msg">No profiles added yet. Go to Profile page to add one!</div>
+    </div>
+</div>
+
+<!-- PROJECTS SECTION -->
+<div class="projects-section" id="projectsSection">
+    <div class="projects-header">
+        <h2>My Projects</h2>
+        <button class="projects-manage-btn" onclick="goProfile()">Manage in Profile</button>
+    </div>
+
+    <div id="projectsContainer" class="projects-container">
+        <div class="no-projects-msg">No projects added yet. Add your deployed links in Profile.</div>
+    </div>
+</div>
+
+<!-- GLOBAL CONTESTS SECTION -->
+<div class="contests-section" id="contestsSection">
+    <div class="contests-header">
+        <h2>🏆 Global Contests</h2>
+        <span class="contests-subtitle">Stay updated with upcoming competitive programming contests</span>
+    </div>
+
+    <div class="contests-platforms">
+
+        <!-- CodeChef -->
+        <div class="contest-platform-card" id="contestCard-CODECHEF">
+            <div class="contest-platform-header">
+                <div class="contest-platform-info">
+                    <div class="contest-platform-logo codechef-logo">CC</div>
+                    <div>
+                        <div class="contest-platform-name">CodeChef</div>
+                        <div class="contest-platform-status" id="contestStatus-CODECHEF">Loading...</div>
+                    </div>
+                </div>
+                <label class="toggle-switch" title="Toggle contest notifications">
+                    <input type="checkbox" id="toggle-CODECHEF" onchange="toggleContestNotification('CODECHEF', this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="contest-toggle-label" id="toggleLabel-CODECHEF">Notifications Off</div>
+            <div class="contest-list" id="contestList-CODECHEF">
+                <div class="contest-loading">Fetching contests...</div>
+            </div>
+        </div>
+
+        <!-- LeetCode -->
+        <div class="contest-platform-card" id="contestCard-LEETCODE">
+            <div class="contest-platform-header">
+                <div class="contest-platform-info">
+                    <div class="contest-platform-logo leetcode-logo">LC</div>
+                    <div>
+                        <div class="contest-platform-name">LeetCode</div>
+                        <div class="contest-platform-status" id="contestStatus-LEETCODE">Loading...</div>
+                    </div>
+                </div>
+                <label class="toggle-switch" title="Toggle contest notifications">
+                    <input type="checkbox" id="toggle-LEETCODE" onchange="toggleContestNotification('LEETCODE', this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="contest-toggle-label" id="toggleLabel-LEETCODE">Notifications Off</div>
+            <div class="contest-list" id="contestList-LEETCODE">
+                <div class="contest-loading">Fetching contests...</div>
+            </div>
+        </div>
+
+        <!-- Codeforces -->
+        <div class="contest-platform-card" id="contestCard-CODEFORCES">
+            <div class="contest-platform-header">
+                <div class="contest-platform-info">
+                    <div class="contest-platform-logo codeforces-logo">CF</div>
+                    <div>
+                        <div class="contest-platform-name">Codeforces</div>
+                        <div class="contest-platform-status" id="contestStatus-CODEFORCES">Loading...</div>
+                    </div>
+                </div>
+                <label class="toggle-switch" title="Toggle contest notifications">
+                    <input type="checkbox" id="toggle-CODEFORCES" onchange="toggleContestNotification('CODEFORCES', this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="contest-toggle-label" id="toggleLabel-CODEFORCES">Notifications Off</div>
+            <div class="contest-list" id="contestList-CODEFORCES">
+                <div class="contest-loading">Fetching contests...</div>
+            </div>
+        </div>
+
     </div>
 </div>
 

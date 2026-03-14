@@ -251,6 +251,177 @@
             box-sizing: border-box;
         }
 
+        .project-section {
+            max-width: 920px;
+            margin: 30px auto 100px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(30px);
+        }
+
+        .project-section h3 {
+            margin: 0 0 18px 0;
+            font-size: 22px;
+            color: var(--text-dark);
+        }
+
+        .project-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .project-form-grid .full {
+            grid-column: 1 / -1;
+        }
+
+        .project-textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .project-form-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .project-save-btn {
+            padding: 10px 18px;
+            background: linear-gradient(90deg, var(--primary-orange), var(--primary-yellow));
+            border: none;
+            color: white;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .project-cancel-btn {
+            padding: 10px 18px;
+            background: #e2e8f0;
+            border: none;
+            color: var(--text-dark);
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .project-featured-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-gray);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .project-entry {
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #dbeafe;
+            background: #f8fbff;
+        }
+
+        .project-entry-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .project-entry-title {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .project-entry-stack {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--text-gray);
+            font-weight: 600;
+        }
+
+        .project-entry-desc {
+            margin: 10px 0;
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.45;
+        }
+
+        .project-entry-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .project-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            background: white;
+        }
+
+        .project-entry-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .project-entry-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .project-entry-btn.edit {
+            background: #22c55e;
+            color: white;
+        }
+
+        .project-entry-btn.delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .project-empty {
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 16px;
+            color: var(--text-gray);
+            font-size: 13px;
+        }
+
         @media (max-width: 768px) {
             .profile-card {
                 grid-template-columns: 1fr;
@@ -258,6 +429,22 @@
 
             .profile-actions {
                 justify-content: flex-end;
+            }
+
+            .project-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .project-form-actions {
+                flex-wrap: wrap;
+            }
+
+            .project-entry-top {
+                flex-direction: column;
+            }
+
+            .project-entry-actions {
+                justify-content: flex-start;
             }
         }
 
@@ -384,6 +571,48 @@ if (!userEmail) window.location.href = "user_login.html";
     </div>
 </div>
 
+<div class="project-section" id="projectSection">
+    <h3>Projects Portfolio</h3>
+
+    <div class="project-form-grid">
+        <div class="full">
+            <label for="projectTitle">Project Title</label>
+            <input id="projectTitle" type="text" placeholder="AI Resume Analyzer">
+        </div>
+        <div class="full">
+            <label for="projectTech">Tech Stack</label>
+            <input id="projectTech" type="text" placeholder="React, Spring Boot, MySQL">
+        </div>
+        <div class="full">
+            <label for="projectDeployedLink">Deployed Link</label>
+            <input id="projectDeployedLink" type="text" placeholder="https://your-project.vercel.app">
+        </div>
+        <div class="full">
+            <label for="projectGithubLink">GitHub Link (optional)</label>
+            <input id="projectGithubLink" type="text" placeholder="https://github.com/username/repo">
+        </div>
+        <div class="full">
+            <label for="projectDescription">Description</label>
+            <textarea id="projectDescription" class="project-textarea" placeholder="Short summary of your project impact and features."></textarea>
+        </div>
+    </div>
+
+    <div class="project-form-actions">
+        <button class="project-save-btn" id="projectSaveBtn" onclick="saveProject()">Add Project</button>
+        <button class="project-cancel-btn" id="projectCancelBtn" onclick="cancelProjectEdit()">Cancel Edit</button>
+        <label class="project-featured-wrap" for="projectFeatured">
+            <input id="projectFeatured" type="checkbox">
+            Mark as featured
+        </label>
+    </div>
+
+    <div id="projectStatus" class="status-message"></div>
+
+    <div class="project-list" id="projectsList">
+        <div class="project-empty">No projects added yet.</div>
+    </div>
+</div>
+
 <script>
 
 /* ================= NAVIGATION ================= */
@@ -457,6 +686,17 @@ const socialPlatforms = [
     { platform: "CodeChef", key: "codechef", icon: "👨‍💻" },
     { platform: "HackerRank", key: "hackerrank", icon: "🏆" }
 ];
+
+let editingProjectId = null;
+
+function escapeHtml(value) {
+    return (value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 function renderSocialProfiles(profiles) {
     const profileMap = {};
@@ -731,6 +971,204 @@ async function loadSocialProfiles() {
     }
 }
 
+function normalizeProjectUrl(rawValue) {
+    const value = (rawValue || "").trim();
+    if (!value) {
+        return "";
+    }
+
+    if (/^https?:\/\//i.test(value)) {
+        return value;
+    }
+
+    return `https://${value}`;
+}
+
+function collectProjectFormData() {
+    return {
+        title: document.getElementById("projectTitle").value.trim(),
+        deployedLink: normalizeProjectUrl(document.getElementById("projectDeployedLink").value),
+        githubLink: normalizeProjectUrl(document.getElementById("projectGithubLink").value),
+        techStack: document.getElementById("projectTech").value.trim(),
+        description: document.getElementById("projectDescription").value.trim(),
+        featured: document.getElementById("projectFeatured").checked
+    };
+}
+
+function resetProjectForm() {
+    editingProjectId = null;
+    document.getElementById("projectTitle").value = "";
+    document.getElementById("projectDeployedLink").value = "";
+    document.getElementById("projectGithubLink").value = "";
+    document.getElementById("projectTech").value = "";
+    document.getElementById("projectDescription").value = "";
+    document.getElementById("projectFeatured").checked = false;
+    document.getElementById("projectSaveBtn").innerText = "Add Project";
+    document.getElementById("projectCancelBtn").style.display = "none";
+}
+
+function cancelProjectEdit() {
+    resetProjectForm();
+    document.getElementById("projectStatus").innerText = "";
+}
+
+function startProjectEdit(project) {
+    editingProjectId = project.id;
+    document.getElementById("projectTitle").value = project.title || "";
+    document.getElementById("projectDeployedLink").value = project.deployedLink || "";
+    document.getElementById("projectGithubLink").value = project.githubLink || "";
+    document.getElementById("projectTech").value = project.techStack || "";
+    document.getElementById("projectDescription").value = project.description || "";
+    document.getElementById("projectFeatured").checked = Boolean(project.featured);
+    document.getElementById("projectSaveBtn").innerText = "Update Project";
+    document.getElementById("projectCancelBtn").style.display = "inline-block";
+    document.getElementById("projectStatus").innerText = "Editing selected project";
+}
+
+function renderProjects(projects) {
+    const container = document.getElementById("projectsList");
+
+    if (!Array.isArray(projects) || projects.length === 0) {
+        container.innerHTML = '<div class="project-empty">No projects added yet.</div>';
+        return;
+    }
+
+    container.innerHTML = projects.map((project) => {
+        const featured = project.featured ? '<span class="profile-label">Featured</span>' : '';
+        const title = escapeHtml(project.title || "Untitled Project");
+        const tech = escapeHtml(project.techStack || "Tech stack not specified");
+        const description = escapeHtml(project.description || "No description added.");
+        const deployedLink = project.deployedLink || "";
+        const githubLink = project.githubLink || "";
+
+        return `
+            <div class="project-entry">
+                <div class="project-entry-top">
+                    <div>
+                        <h4 class="project-entry-title">${title}</h4>
+                        <div class="project-entry-stack">${tech}</div>
+                    </div>
+                    ${featured}
+                </div>
+
+                <p class="project-entry-desc">${description}</p>
+
+                <div class="project-entry-links">
+                    <a class="project-link-btn" href="${escapeHtml(deployedLink)}" target="_blank" rel="noopener noreferrer">Live Demo</a>
+                    ${githubLink ? `<a class="project-link-btn" href="${escapeHtml(githubLink)}" target="_blank" rel="noopener noreferrer">GitHub</a>` : ""}
+                </div>
+
+                <div class="project-entry-actions">
+                    <button class="project-entry-btn edit" onclick="editProjectById(${project.id})">Edit</button>
+                    <button class="project-entry-btn delete" onclick="deleteProject(${project.id})">Delete</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+let cachedProjects = [];
+
+function editProjectById(projectId) {
+    const project = cachedProjects.find((item) => item.id === projectId);
+    if (!project) {
+        return;
+    }
+    startProjectEdit(project);
+}
+
+async function loadProjects() {
+    try {
+        const response = await fetch(`http://localhost:8089/api/students/projects?email=${encodeURIComponent(userEmail)}`);
+        if (!response.ok) {
+            cachedProjects = [];
+            renderProjects([]);
+            return;
+        }
+
+        const data = await response.json();
+        cachedProjects = Array.isArray(data) ? data : [];
+        renderProjects(cachedProjects);
+    } catch (error) {
+        console.error("Error loading projects:", error);
+        cachedProjects = [];
+        renderProjects([]);
+    }
+}
+
+async function saveProject() {
+    const payload = collectProjectFormData();
+    const statusEl = document.getElementById("projectStatus");
+
+    if (!payload.title) {
+        statusEl.innerText = "Project title is required";
+        return;
+    }
+
+    if (!payload.deployedLink) {
+        statusEl.innerText = "Deployed link is required";
+        return;
+    }
+
+    try {
+        const isEdit = editingProjectId != null;
+        const url = isEdit
+            ? `http://localhost:8089/api/students/projects/${editingProjectId}?email=${encodeURIComponent(userEmail)}`
+            : `http://localhost:8089/api/students/projects?email=${encodeURIComponent(userEmail)}`;
+
+        const response = await fetch(url, {
+            method: isEdit ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            statusEl.innerText = data?.message || "Failed to save project";
+            return;
+        }
+
+        statusEl.innerText = isEdit ? "Project updated successfully" : "Project added successfully";
+        resetProjectForm();
+        await loadProjects();
+    } catch (error) {
+        console.error("Error saving project:", error);
+        statusEl.innerText = "Error saving project";
+    }
+}
+
+async function deleteProject(projectId) {
+    if (!confirm("Delete this project?")) {
+        return;
+    }
+
+    const statusEl = document.getElementById("projectStatus");
+
+    try {
+        const response = await fetch(
+            `http://localhost:8089/api/students/projects/${projectId}?email=${encodeURIComponent(userEmail)}`,
+            { method: "DELETE" }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            statusEl.innerText = data?.message || "Failed to delete project";
+            return;
+        }
+
+        statusEl.innerText = "Project deleted successfully";
+        if (editingProjectId === projectId) {
+            resetProjectForm();
+        }
+        await loadProjects();
+    } catch (error) {
+        console.error("Error deleting project:", error);
+        statusEl.innerText = "Error deleting project";
+    }
+}
+
 /* ================= GSAP ANIMATION ================= */
 
 async function initAnimations() {
@@ -740,7 +1178,7 @@ async function initAnimations() {
     });
 
     // 1. Make cards visible
-    gsap.set(["#profileCard", "#socialSection"], { autoAlpha: 1 });
+    gsap.set(["#profileCard", "#socialSection", "#projectSection"], { autoAlpha: 1 });
 
     // 2. Main profile card entrance with 3D effect
     tl.from("#profileCard", {
@@ -778,7 +1216,26 @@ async function initAnimations() {
         ease: "power2.out"
     }, "-=0.2")
 
+    .to("#projectSection", {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        ease: "power2.out"
+    }, "-=0.2")
+
     .fromTo("#socialSection .profile-card", {
+        opacity: 0,
+        y: 18
+    }, {
+        opacity: 1,
+        y: 0,
+        stagger: 0.05,
+        duration: 0.5,
+        ease: "power2.out",
+        clearProps: "opacity,transform"
+    }, "-=0.45")
+
+    .fromTo("#projectSection .project-entry", {
         opacity: 0,
         y: 18
     }, {
@@ -802,8 +1259,10 @@ async function initAnimations() {
 
 // Load profile and then start animations
 renderSocialProfiles([]);
+renderProjects([]);
+resetProjectForm();
 
-Promise.all([loadProfile(), loadSocialProfiles()]).then(() => {
+Promise.all([loadProfile(), loadSocialProfiles(), loadProjects()]).then(() => {
     initAnimations();
 });
 

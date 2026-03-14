@@ -13,9 +13,6 @@ import com.example.internship_ai_backend.dto.MatchedInternshipDTO;
 import com.example.internship_ai_backend.entity.Student;
 import com.example.internship_ai_backend.service.InternshipRecommendationService;
 import com.example.internship_ai_backend.service.InternshipMatchingService;
-import com.example.internship_ai_backend.service.CertificateVerificationService;
-import com.example.internship_ai_backend.service.MongoDBCertificateVerificationService;
-import com.example.internship_ai_backend.service.UniversalCertificateVerificationService;
 import com.example.internship_ai_backend.service.SocialAnalyticsService;
 import com.example.internship_ai_backend.service.StudentService;
 
@@ -40,15 +37,6 @@ public class StudentController {
 
     @Autowired
     private InternshipMatchingService internshipMatchingService;
-
-    @Autowired
-    private CertificateVerificationService certificateVerificationService;
-
-    @Autowired
-    private MongoDBCertificateVerificationService mongoDBCertificateVerificationService;
-
-    @Autowired
-    private UniversalCertificateVerificationService universalCertificateVerificationService;
 
     // ===================== SIGNUP =====================
     @PostMapping("/signup")
@@ -190,17 +178,5 @@ public class StudentController {
                                 internshipMatchingService.getAllInternships();
 
                 return ResponseEntity.ok(allInternships);
-        }
-
-        // ===================== VERIFY CERTIFICATE =====================
-        @PostMapping(value = "/certificate/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-        public ResponseEntity<Map<String, Object>> verifyCertificate(
-                        @RequestPart("certificate") MultipartFile certificate) {
-
-                // Use universal certificate verification service (supports MongoDB, AWS, Google Cloud, Coursera, Udemy, LinkedIn Learning)
-                Map<String, Object> verificationResult =
-                                universalCertificateVerificationService.verifyCertificate(certificate);
-
-                return ResponseEntity.ok(verificationResult);
         }
 }
