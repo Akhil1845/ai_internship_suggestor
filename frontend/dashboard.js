@@ -1,4 +1,22 @@
 
+/* THEME */
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
 /* NAVIGATION */
 
 function logout() {
@@ -393,6 +411,7 @@ function renderMatchedInternships(internships) {
 
 // Raw text toggle handler
 document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
     resetResumeRecommendationsUI();
 });
 

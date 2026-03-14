@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
     <title>My Profile - CareerPilot</title>
 
@@ -13,13 +13,32 @@
             --text-dark: #1e293b;
             --text-gray: #64748b;
             --bg-blue: #f0f9ff;
+            --bg-card: #ffffff;
+            --bg-page: linear-gradient(180deg, #ffffff, #f0f9ff);
+            --navbar-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --sub-bg: #f0f9ff;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --text-dark: #f1f5f9;
+            --text-gray: #94a3b8;
+            --bg-blue: #0f172a;
+            --bg-card: #1e293b;
+            --bg-page: linear-gradient(180deg, #1e293b, #0f172a);
+            --navbar-bg: #1e293b;
+            --border-color: #334155;
+            --sub-bg: #243044;
+            --input-bg: #1e293b;
         }
 
         body {
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(180deg, #ffffff, #f0f9ff);
+            background: var(--bg-page);
             color: var(--text-dark);
+            transition: background .3s, color .3s;
         }
 
         /* NAVBAR */
@@ -28,13 +47,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 25px 60px;
-            background: white;
+            background: var(--navbar-bg);
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: background .3s;
         }
 
         .project-title {
             font-size: 20px;
             font-weight: bold;
+            color: var(--text-dark);
         }
 
         .project-title .gold-text {
@@ -51,11 +72,27 @@
             cursor: pointer;
         }
 
+        .theme-toggle-profile {
+            background: transparent !important;
+            border: 1.5px solid var(--border-color) !important;
+            color: var(--text-dark) !important;
+            padding: 8px 12px !important;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: border-color .2s;
+        }
+
+        .theme-toggle-profile:hover {
+            border-color: var(--primary-orange) !important;
+        }
+
         /* PROFILE CARD */
         .profile-container {
             max-width: 900px;
             margin: 100px auto;
-            background: white;
+            background: var(--bg-card);
             padding: 50px;
             border-radius: 20px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.05);
@@ -109,7 +146,7 @@
         .social-section {
             max-width: 920px;
             margin: 30px auto 100px;
-            background: #ffffff;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 32px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.05);
@@ -132,7 +169,7 @@
 
         .profile-card {
             padding: 14px 20px;
-            background: #f0f9ff;
+            background: var(--sub-bg);
             border-radius: 12px;
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
@@ -243,18 +280,18 @@
         .profile-value {
             width: 100%;
             padding: 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
             color: var(--text-dark);
-            background: #ffffff;
+            background: var(--input-bg);
             box-sizing: border-box;
         }
 
         .project-section {
             max-width: 920px;
             margin: 30px auto 100px;
-            background: #ffffff;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 32px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.05);
@@ -338,8 +375,8 @@
         .project-entry {
             padding: 14px;
             border-radius: 12px;
-            border: 1px solid #dbeafe;
-            background: #f8fbff;
+            border: 1px solid var(--border-color);
+            background: var(--sub-bg);
         }
 
         .project-entry-top {
@@ -384,9 +421,9 @@
             border-radius: 8px;
             font-size: 12px;
             font-weight: 700;
-            border: 1px solid #cbd5e1;
-            color: #0f172a;
-            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            background: var(--bg-card);
         }
 
         .project-entry-actions {
@@ -458,8 +495,11 @@ if (!userEmail) window.location.href = "user_login.html";
 </script>
 
 <div class="navbar">
-    <div class="project-title">CareerPilot</div>
-    <button onclick="goDashboard()">Back to Dashboard</button>
+    <div class="project-title">Career<span class="gold-text">Pilot</span></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="goDashboard()">Back to Dashboard</button>
+        <button class="theme-toggle-profile" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
 </div>
 
 <div class="profile-container" id="profileCard">
@@ -614,6 +654,24 @@ if (!userEmail) window.location.href = "user_login.html";
 </div>
 
 <script>
+
+/* ================= THEME ================= */
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+}
 
 /* ================= NAVIGATION ================= */
 
@@ -828,7 +886,7 @@ function openAddProfileModal(platformKey) {
 
     const content = document.createElement('div');
     content.style.cssText = `
-        background: white;
+        background: var(--bg-card);
         padding: 40px;
         border-radius: 15px;
         width: 90%;
@@ -1261,10 +1319,7 @@ async function initAnimations() {
 renderSocialProfiles([]);
 renderProjects([]);
 resetProjectForm();
-
-Promise.all([loadProfile(), loadSocialProfiles(), loadProjects()]).then(() => {
-    initAnimations();
-});
+initTheme();
 
 </script>
 

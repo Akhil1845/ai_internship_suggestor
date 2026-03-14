@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
     <title>CareerPilot</title>
 
@@ -16,12 +16,13 @@ if (!userEmail) window.location.href = "user_login.html";
 </script>
 
 <div class="navbar">
-    <div class="project-title">CareerPilot</div>
+    <div class="project-title">Career<span class="gold-text">Pilot</span></div>
     <div class="nav-right">
         <button onclick="buildResume()">Build Resume</button>
         <button onclick="window.location.href='internship-prep.html'">Internship Prep</button>
         <button onclick="goProfile()">Profile</button>
         <button onclick="logout()">Logout</button>
+        <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
     </div>
 </div>
 

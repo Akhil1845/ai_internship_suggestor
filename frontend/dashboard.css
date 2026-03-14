@@ -4,6 +4,26 @@
     --text-dark: #1e293b;
     --text-gray: #64748b;
     --bg-blue: #f0f9ff;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --border-color: #e2e8f0;
+    --navbar-bg: #ffffff;
+    --section-bg: #ffffff;
+    --sub-card-bg: #f8fbff;
+    --contest-card-bg: #f8fbff;
+}
+
+[data-theme="dark"] {
+    --text-dark: #f1f5f9;
+    --text-gray: #94a3b8;
+    --bg-blue: #0f172a;
+    --bg-card: #1e293b;
+    --bg-input: #1e293b;
+    --border-color: #334155;
+    --navbar-bg: #1e293b;
+    --section-bg: #1e293b;
+    --sub-card-bg: #243044;
+    --contest-card-bg: #243044;
 }
 
 body {
@@ -12,6 +32,7 @@ body {
     background: var(--bg-blue);
     color: var(--text-dark);
     overflow-x: hidden;
+    transition: background .3s, color .3s;
 }
 
 /* ================= NAVBAR ================= */
@@ -21,17 +42,37 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 25px 50px;
-    background: white;
+    background: var(--navbar-bg);
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 .project-title {
     font-size: 20px;
     font-weight: bold;
+    color: var(--text-dark);
 }
 
 .project-title .gold-text {
     color: var(--primary-orange);
+}
+
+.theme-toggle-btn {
+    margin-left: 10px;
+    background: transparent !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--text-dark) !important;
+    padding: 8px 12px !important;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: border-color .2s, transform .15s;
+}
+
+.theme-toggle-btn:hover {
+    border-color: var(--primary-orange) !important;
+    transform: scale(1.08) !important;
+    box-shadow: none !important;
 }
 
 .nav-right button {
@@ -93,7 +134,7 @@ body {
 }
 
 .card {
-    background: white;
+    background: var(--bg-card);
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.05);
@@ -168,7 +209,7 @@ input[type="file"] {
 
 .recommendations-section {
     padding: 34px 60px;
-    background: white;
+    background: var(--section-bg);
     margin: 0 60px 0;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.05);
@@ -194,8 +235,8 @@ input[type="file"] {
 }
 
 .recommendation-card {
-    background: #f8fbff;
-    border: 1px solid #e2e8f0;
+    background: var(--sub-card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 14px;
     display: flex;
@@ -392,7 +433,7 @@ input[type="file"] {
 
 .social-section {
     padding: 40px 60px;
-    background: white;
+    background: var(--section-bg);
     margin: 40px 60px 0;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.05);
@@ -475,7 +516,7 @@ input[type="file"] {
 .profile-card {
     width: 100%;
     padding: 16px 18px;
-    background: #f0f9ff;
+    background: var(--sub-card-bg);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -585,7 +626,7 @@ input[type="file"] {
 
 .projects-section {
     padding: 34px 40px;
-    background: white;
+    background: var(--section-bg);
     margin: 28px 60px 0;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.05);
@@ -722,7 +763,7 @@ input[type="file"] {
 }
 
 .analytics-content {
-    background: white;
+    background: var(--bg-card);
     padding: 28px;
     border-radius: 20px;
     width: min(760px, 100%);
@@ -941,7 +982,7 @@ input[type="file"] {
 }
 
 .matched-internships-section {
-    background: white;
+    background: var(--section-bg);
     border-radius: 20px;
     padding: 28px;
     margin: 28px auto;
@@ -1013,8 +1054,8 @@ input[type="file"] {
 }
 
 .internship-card {
-    background: linear-gradient(135deg, #fbfdff 0%, #f8fbff 100%);
-    border: 2px solid #e2e8f0;
+    background: var(--sub-card-bg);
+    border: 2px solid var(--border-color);
     border-radius: 14px;
     padding: 20px;
     transition: all 0.3s ease;
@@ -1193,7 +1234,7 @@ input[type="file"] {
 
 .contests-section {
     padding: 34px 40px;
-    background: white;
+    background: var(--section-bg);
     margin: 28px 60px 28px;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.05);
@@ -1225,10 +1266,10 @@ input[type="file"] {
 }
 
 .contest-platform-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 18px;
-    background: #f8fbff;
+    background: var(--contest-card-bg);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1356,8 +1397,8 @@ input[type="file"] {
 }
 
 .contest-item {
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 10px 12px;
     display: flex;
