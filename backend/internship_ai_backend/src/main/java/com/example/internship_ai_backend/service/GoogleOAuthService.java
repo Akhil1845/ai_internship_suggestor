@@ -20,17 +20,17 @@ public class GoogleOAuthService {
     private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
-    @Value("${app.oauth.google.client-id}")
-    private String clientId;
-
-    @Value("${app.oauth.google.client-secret:}")
-    private String clientSecret;
-
     @Value("${app.oauth.google.redirect-uri}")
     private String redirectUri;
 
     @Value("${app.oauth.google.scope:email profile}")
     private String scope;
+
+    @Value("${GOOGLE_CLIENT_ID:}")
+    private String googleClientIdProperty;
+
+    @Value("${GOOGLE_CLIENT_SECRET:}")
+    private String googleClientSecretProperty;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -40,6 +40,12 @@ public class GoogleOAuthService {
     }
 
     public String buildAuthorizationUrl(String state) {
+        String clientId = System.getenv("GOOGLE_CLIENT_ID");
+        if (clientId == null || clientId.isBlank()) {
+            clientId = googleClientIdProperty;
+        }
+        validateAuthUrlConfig(clientId);
+
         String safeState = (state == null || state.isBlank()) ? "login" : state.trim().toLowerCase();
         return "https://accounts.google.com/o/oauth2/v2/auth?" +
                 "client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
@@ -51,7 +57,7 @@ public class GoogleOAuthService {
                 "&state=" + URLEncoder.encode(safeState, StandardCharsets.UTF_8);
     }
 
-    private void validateOAuthConfig() {
+    private void validateOAuthConfig(String clientId, String clientSecret) {
         if (clientId == null || clientId.isBlank()) {
             throw new IllegalStateException("Google OAuth client id is missing");
         }
@@ -63,11 +69,28 @@ public class GoogleOAuthService {
         }
     }
 
+    private void validateAuthUrlConfig(String clientId) {
+        if (clientId == null || clientId.isBlank()) {
+            throw new IllegalStateException("Google OAuth client id is missing");
+        }
+        if (redirectUri == null || redirectUri.isBlank()) {
+            throw new IllegalStateException("Google OAuth redirect URI is missing");
+        }
+    }
+
     /**
      * Exchange authorization code for access token
      */
     public String exchangeCodeForToken(String code, String redirectUri) throws Exception {
-        validateOAuthConfig();
+        String clientId = System.getenv("GOOGLE_CLIENT_ID");
+        String clientSecret = System.getenv("GOOGLE_CLIENT_SECRET");
+        if (clientId == null || clientId.isBlank()) {
+            clientId = googleClientIdProperty;
+        }
+        if (clientSecret == null || clientSecret.isBlank()) {
+            clientSecret = googleClientSecretProperty;
+        }
+        validateOAuthConfig(clientId, clientSecret);
         
         String requestBody = "code=" + URLEncoder.encode(code, StandardCharsets.UTF_8) +
                 "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +

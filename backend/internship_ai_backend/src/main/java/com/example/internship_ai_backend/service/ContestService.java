@@ -11,11 +11,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ContestService {
 
     private static final Map<String, String> KONTESTS_URLS = new LinkedHashMap<>();
+    private static final long CACHE_TTL_MS = 2 * 60 * 1000;
 
     static {
         KONTESTS_URLS.put("CODEFORCES", "https://kontests.net/api/v1/codeforces");
@@ -25,6 +27,17 @@ public class ContestService {
 
     private final ContestPreferenceRepository preferenceRepository;
     private final RestTemplate restTemplate;
+    private final Map<String, CachedContestData> contestCache = new ConcurrentHashMap<>();
+
+    private static final class CachedContestData {
+        private final List<Map<String, Object>> contests;
+        private final long fetchedAt;
+
+        private CachedContestData(List<Map<String, Object>> contests, long fetchedAt) {
+            this.contests = contests;
+            this.fetchedAt = fetchedAt;
+        }
+    }
 
     public ContestService(ContestPreferenceRepository preferenceRepository) {
         this.preferenceRepository = preferenceRepository;
@@ -37,6 +50,12 @@ public class ContestService {
     /** Fetch upcoming contests: try kontests.net first, then platform-specific API. */
     public List<Map<String, Object>> getContests(String platform) {
         String key = platform.toUpperCase();
+        long now = System.currentTimeMillis();
+
+        CachedContestData cached = contestCache.get(key);
+        if (cached != null && (now - cached.fetchedAt) < CACHE_TTL_MS) {
+            return cached.contests;
+        }
 
         // Attempt 1: kontests.net (with browser User-Agent to avoid blocking)
         String konUrl = KONTESTS_URLS.get(key);
@@ -52,17 +71,32 @@ public class ContestService {
                     new ParameterizedTypeReference<List<Map<String, Object>>>() {});
 
                 List<Map<String, Object>> result = response.getBody();
-                if (result != null && !result.isEmpty()) return result;
+                if (result != null && !result.isEmpty()) {
+                    contestCache.put(key, new CachedContestData(result, now));
+                    return result;
+                }
             } catch (Exception ignored) {}
         }
 
         // Attempt 2: platform-specific fallback
+        List<Map<String, Object>> fallback;
         switch (key) {
-            case "CODEFORCES": return fetchCodeforces();
-            case "LEETCODE":   return fetchLeetCode();
-            case "CODECHEF":   return fetchCodeChef();
-            default:           return Collections.emptyList();
+            case "CODEFORCES": fallback = fetchCodeforces(); break;
+            case "LEETCODE":   fallback = fetchLeetCode(); break;
+            case "CODECHEF":   fallback = fetchCodeChef(); break;
+            default:            fallback = Collections.emptyList();
         }
+
+        if (!fallback.isEmpty()) {
+            contestCache.put(key, new CachedContestData(fallback, now));
+            return fallback;
+        }
+
+        // If fetch fails, return the last cached data (even if stale) as a fallback.
+        if (cached != null) {
+            return cached.contests;
+        }
+        return Collections.emptyList();
     }
 
     @SuppressWarnings("unchecked")

@@ -1094,6 +1094,7 @@ async function loadProjects() {
 /* ================= GLOBAL CONTESTS ================= */
 
 const CONTEST_PLATFORMS = ["CODECHEF", "LEETCODE", "CODEFORCES"];
+const CONTEST_FETCH_TIMEOUT_MS = 9000;
 
 // Call kontests.net directly from the browser (public CORS-enabled API)
 const CONTEST_API_URLS = {
@@ -1117,7 +1118,7 @@ const PLATFORM_FALLBACK_URLS = {
 async function fetchPlatformContests(platform) {
     try {
         const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), 15000);
+        const tid = setTimeout(() => ctrl.abort(), CONTEST_FETCH_TIMEOUT_MS);
         const res = await fetch(
             `http://localhost:8089/api/contests?platform=${encodeURIComponent(platform)}`,
             { signal: ctrl.signal }
@@ -1269,9 +1270,11 @@ async function loadContests() {
         applyToggleUI(platform, prefs[platform] === true);
     }
 
-    for (const platform of CONTEST_PLATFORMS) {
+    // Fetch all platforms in parallel for faster dashboard rendering.
+    await Promise.all(CONTEST_PLATFORMS.map(async (platform) => {
         const listEl  = document.getElementById(`contestList-${platform}`);
         const statusEl = document.getElementById(`contestStatus-${platform}`);
+
         try {
             const contests = await fetchPlatformContests(platform);
             if (contests && contests.length > 0) {
@@ -1279,25 +1282,26 @@ async function loadContests() {
                 if (prefs[platform] === true && Notification.permission === "granted") {
                     checkAndNotify(platform, contests);
                 }
-            } else {
-                // Both sources failed — show a direct link so user can still check
-                const platformName = platform.charAt(0) + platform.slice(1).toLowerCase();
-                const link = PLATFORM_FALLBACK_URLS[platform];
-                if (listEl) listEl.innerHTML = `
-                    <div class="no-contests-msg">
-                        Live data temporarily unavailable.<br>
-                        <a href="${link}" target="_blank" rel="noopener noreferrer"
-                           style="color:var(--primary-orange);font-weight:700;text-decoration:none;">
-                            View contests on ${platformName} &rarr;
-                        </a>
-                    </div>`;
-                if (statusEl) statusEl.textContent = "Visit platform";
+                return;
             }
+
+            // Data unavailable — show direct platform link.
+            const platformName = platform.charAt(0) + platform.slice(1).toLowerCase();
+            const link = PLATFORM_FALLBACK_URLS[platform];
+            if (listEl) listEl.innerHTML = `
+                <div class="no-contests-msg">
+                    Live data temporarily unavailable.<br>
+                    <a href="${link}" target="_blank" rel="noopener noreferrer"
+                       style="color:var(--primary-orange);font-weight:700;text-decoration:none;">
+                        View contests on ${platformName} &rarr;
+                    </a>
+                </div>`;
+            if (statusEl) statusEl.textContent = "Visit platform";
         } catch (e) {
             if (listEl) listEl.innerHTML = '<div class="no-contests-msg">Failed to load contests.</div>';
             if (statusEl) statusEl.textContent = "Error";
         }
-    }
+    }));
 }
 
 async function loadUser() {
